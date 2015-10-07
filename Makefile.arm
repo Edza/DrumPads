@@ -1,0 +1,32 @@
+# Main executable file
+PROGRAM = DrumPads
+PALMPDK = /opt/PalmPDK
+
+# Directory containing library portions of code.
+INCLUDEDIR = /opt/PalmPDK/include/SDL/ 
+INCLUDEDIR2 = /opt/PalmPDK/include
+
+LIBDIR = /opt/PalmPDK/device/lib
+LIBDIR2 = /opt/PalmPDK/host/lib/
+
+
+# Object files
+OBJECTS = Drum.o
+LIBDIR = /opt/PalmPDK/device/lib
+LIBDIR2 = /opt/PalmPDK/host/lib/
+
+CXX = /opt/PalmPDK/arm-gcc/bin/arm-none-linux-gnueabi-g++
+
+.SUFFIXES:	.o .cpp
+
+.cpp.o :
+	$(CXX) -c -I$(INCLUDEDIR) -I$(INCLUDEDIR2) -o $@ $<
+
+all:    $(PROGRAM)
+
+$(PROGRAM):	$(OBJECTS)
+	$(CXX) -o $(PROGRAM) -I$(INCLUDEDIR) -I$(INCLUDEDIR2) -L$(LIBDIR) -L$(LIBDIR2) $(OBJECTS) -Wl,--allow-shlib-undefined -lSDL -lSDL_image -lSDL_ttf -lSDL_mixer -lrt -lpdl
+	/opt/PalmPDK/arm-gcc/arm-none-linux-gnueabi/bin/strip $(PROGRAM)
+
+clean: 
+	rm -f *.o $(PROGRAM)

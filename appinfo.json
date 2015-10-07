@@ -1,0 +1,10 @@
+{
+	"title": "Drum Pads",
+	"type": "pdk",
+	"main": "DrumPads",
+        "icon": "logo.png",
+	"id": "com.zetacentauri.drumpads",
+	"version": "1.0.2",
+	"vendor": "Zeta Centauri",
+        "requiredMemory": 48
+}
