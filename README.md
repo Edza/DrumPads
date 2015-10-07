@@ -36,3 +36,8 @@ multi-touch to sound multiple drums at the same time.
 
 It was originally written for webOS as a paid app. It was later ported to
 Windows and Linux and released on http://zetacentauri.com
+
+A prebuilt Windows installer is available in the installer directory.
+
+In order to build this program, you'll need to have SDL installed, including
+SDL_image, SDL_ttf, and SDL_mixer.
