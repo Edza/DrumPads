@@ -1,14 +1,14 @@
 #include <stdio.h>
 
-#include "SDL.h"
+#include "SDL/include/SDL.h"
 #undef main
-#include "SDL_mixer.h"
-#include "SDL_image.h"
-#include "SDL_ttf.h"
+#include "SDL/SDL_mixer.h"
+#include "SDL/SDL_image.h"
+#include "SDL/SDL_ttf.h"
 #ifndef WIN32
-#include "PDL.h"
 #include <unistd.h>
 #include <syslog.h>
+#include <string.h>
 #else
 #include "Windows.h"
 #endif
@@ -22,11 +22,13 @@
 #define WIDTH 1024
 #endif
 
-SDL_Surface* Surface;               // Screen surface to retrieve width/height information
+//SDL_Surface* Surface;               // Screen surface to retrieve width/height information
+SDL_Renderer *renderer;
 SDL_Surface* bg;
 int _sampleRate = 44100;
 int _sampleBlockSize = 1024;
-SDL_Surface* _pad;
+SDL_Surface* _padImage;
+SDL_Texture* _pad;
 TTF_Font* font;
 
 #ifdef DEMO
@@ -124,20 +126,35 @@ void AudioCallback(void* userdata, Uint8* stream, int len);
 // Initializes the application data
 int Init(void) 
 {
+	IMG_Init(IMG_INIT_PNG);
     memset(_sampleSetting, 0, sizeof(unsigned int) * NUM_PADS);
     memset(_sample, 0, sizeof(Mix_Chunk*) * NUM_WAVEFORMS);
     // Load drum pad graphic.
 #ifndef WIN32
-	_pad = IMG_Load("images//button256witharrowblue.png");
+	_padImage = IMG_Load("images//button256witharrowblue.png");
 #else
-	_pad = IMG_Load(".\\button256witharrowblue.png");
+	_padImage = IMG_Load(".\\button256witharrowblue.png");
 #endif
 
-    if( _pad == NULL )
+    if( _padImage == NULL )
     {
-        printf("Failed to open button256witharrowblue.png");
+        printf("Failed to open button256witharrowblue.png\n");
 		printf(IMG_GetError());
+		//exit(1);
     }
+	else
+	{
+		SDL_Texture* _pad = SDL_CreateTextureFromSurface(renderer, _padImage);
+		if( _pad != NULL )
+		{
+			printf("Pad image loaded OK. Texture created.\n");
+		}
+		else
+		{
+			printf("Pad image texture creation failed.\n");
+			//exit(3);
+		}
+	}
 
     // Set up the audio stream
     int result = Mix_OpenAudio(_sampleRate, AUDIO_S16SYS, 2, 512);
@@ -226,7 +243,7 @@ void AudioCallback(void* userdata, Uint8* stream, int len)
 // Main-loop workhorse function for displaying the object
 void Display(void)
 {
-    /* draw the background */
+	SDL_RenderClear(renderer);
     SDL_Rect rect;
     SDL_Surface* textSurface;
     SDL_Color foregroundColor = { 192, 204, 255 };
@@ -239,41 +256,37 @@ void Display(void)
             rect.y = j * 256;
             rect.w = 256;
             rect.h = 256;
-            SDL_BlitSurface(_pad, NULL, Surface, &rect);
+			if( _pad == NULL )
+			{
+				//exit(2);
+			}
+            SDL_RenderCopy(renderer, _pad, NULL, &rect);
             textSurface = TTF_RenderText_Shaded(font, &(_waveFileNames[_sampleSetting[(j * NUM_PADS_WIDE + i)]][9]), foregroundColor, backgroundColor);
             rect.x += 16;
             rect.y += 16;
-            SDL_BlitSurface(textSurface, NULL, Surface, &rect);
+			rect.w = textSurface->w;
+			rect.h = textSurface->h;
+			SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+            SDL_RenderCopy(renderer, textTexture, NULL, &rect);
             SDL_FreeSurface(textSurface);
+            SDL_DestroyTexture(textTexture);
         }
     }
-    /* update the screen */
-	// TODO: Figure out what to do about this.
-    //SDL_UpdateRect(Surface, 0, 0, 0, 0);
+	SDL_RenderPresent(renderer);
 }
 
 int main(int argc, char** argv)
 {
+#ifndef linux
+#ifndef _DEBUG
 	HWND windowHandle = GetConsoleWindow();
 	ShowWindow(windowHandle, SW_HIDE);
-#ifndef WIN32
-	openlog("com.zetacentauri.drumpads", 0, LOG_USER);
+#endif
 #endif
 
     // Initialize the SDL library with the Video subsystem
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_AUDIO );
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO );
     atexit(SDL_Quit);
-
-    // start the PDL library
-#ifndef linux
-#ifndef WIN32
-    PDL_Init(0);
-    atexit(PDL_Quit);
-#endif
-#endif
-
-    // Set the video mode to full screen with OpenGL-ES support
-    //Surface = SDL_SetVideoMode(320, 480, 0, SDL_OPENGL);
 
 	int width  = 640;
 	int height = 480;
@@ -286,7 +299,7 @@ int main(int argc, char** argv)
 										  HEIGHT,
 										  SDL_WINDOW_RESIZABLE);
 
-	Surface = SDL_GetWindowSurface(window);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	// TODO: Reimplement set icon function.
 	//SDL_WM_SetIcon(SDL_LoadBMP("DrumPads.bmp"), NULL);
@@ -320,14 +333,6 @@ int main(int argc, char** argv)
         {
             switch (Event.type) 
             {
-#ifdef ARM
-                case PDLK_GESTURE_BACK: // Includes escape.
-                    if( PDL_GetPDKVersion() >= 200 )
-                    {
-                        PDL_Minimize(); // Minimize to a card.
-                    }
-                    break;
-#endif
                 case SDL_MOUSEBUTTONDOWN:
                     {
                         int pad = ( Event.button.x / 256) + ((Event.button.y / 256) * NUM_PADS_WIDE);
@@ -351,18 +356,6 @@ int main(int argc, char** argv)
                 case SDL_KEYDOWN:
                     switch (Event.key.keysym.sym) 
                     {
-#ifndef WIN32
-                        case PDLK_GESTURE_BACK: /* also maps to ESC */
-#ifndef linux
-                            if (PDL_GetPDKVersion() >= 200) 
-                            {
-                                // standard behavior is to minimize to a card when you perform a back
-                                // gesture at the top level of the app
-                                PDL_Minimize();
-                            }
-#endif
-                            break;
-#endif
                         case 'q':
                         case 't':
                             Mix_PlayChannel(-1, _sample[_sampleSetting[0]], 0);
@@ -450,6 +443,7 @@ int main(int argc, char** argv)
     }
 
     Mix_CloseAudio();
+	IMG_Quit();
     SDL_Quit();
     return 0;
 }
