@@ -23,11 +23,10 @@
 #endif
 
 //SDL_Surface* Surface;               // Screen surface to retrieve width/height information
-SDL_Renderer *renderer;
+SDL_Renderer *_renderer;
 SDL_Surface* bg;
 int _sampleRate = 44100;
 int _sampleBlockSize = 1024;
-SDL_Surface* _padImage;
 SDL_Texture* _pad;
 TTF_Font* font;
 
@@ -117,7 +116,7 @@ const char* _waveFileNames[] =
 "samples//Snare-Drum-5.wav",
 "samples//Snare-Drum-6.wav"
 };
-#endif 
+#endif
 Mix_Chunk* _sample[NUM_WAVEFORMS];
 unsigned int _sampleSetting[NUM_PADS];
 
@@ -130,13 +129,14 @@ int Init(void)
     memset(_sampleSetting, 0, sizeof(unsigned int) * NUM_PADS);
     memset(_sample, 0, sizeof(Mix_Chunk*) * NUM_WAVEFORMS);
     // Load drum pad graphic.
+    SDL_Surface* padImage;
 #ifndef WIN32
-	_padImage = IMG_Load("images//button256witharrowblue.png");
+	padImage = IMG_Load("images//button256witharrowblue.png");
 #else
-	_padImage = IMG_Load(".\\button256witharrowblue.png");
+	padImage = IMG_Load(".\\button256witharrowblue.png");
 #endif
 
-    if( _padImage == NULL )
+    if( padImage == NULL )
     {
         printf("Failed to open button256witharrowblue.png\n");
 		printf(IMG_GetError());
@@ -144,16 +144,20 @@ int Init(void)
     }
 	else
 	{
-		SDL_Texture* _pad = SDL_CreateTextureFromSurface(renderer, _padImage);
+        _pad = SDL_CreateTextureFromSurface(_renderer, padImage);
 		if( _pad != NULL )
 		{
 			printf("Pad image loaded OK. Texture created.\n");
+            int w, h;
+            int textresult = SDL_QueryTexture(_pad, NULL, NULL, &w, &h);
+            printf("QueryTexture result: %d, width: %d, height: %d\n", textresult, w, h);
 		}
 		else
 		{
 			printf("Pad image texture creation failed.\n");
 			//exit(3);
 		}
+        SDL_FreeSurface(padImage);
 	}
 
     // Set up the audio stream
@@ -243,7 +247,7 @@ void AudioCallback(void* userdata, Uint8* stream, int len)
 // Main-loop workhorse function for displaying the object
 void Display(void)
 {
-	SDL_RenderClear(renderer);
+	SDL_RenderClear(_renderer);
     SDL_Rect rect;
     SDL_Surface* textSurface;
     SDL_Color foregroundColor = { 192, 204, 255 };
@@ -260,19 +264,24 @@ void Display(void)
 			{
 				//exit(2);
 			}
-            SDL_RenderCopy(renderer, _pad, NULL, &rect);
+            int result = SDL_RenderCopy(_renderer, _pad, NULL, &rect);
+            if( result != 0 )
+            {
+                printf("Square %d, %d render error: %s\n", i, j, SDL_GetError());
+                //exit(-1);
+            }
             textSurface = TTF_RenderText_Shaded(font, &(_waveFileNames[_sampleSetting[(j * NUM_PADS_WIDE + i)]][9]), foregroundColor, backgroundColor);
             rect.x += 16;
             rect.y += 16;
 			rect.w = textSurface->w;
 			rect.h = textSurface->h;
-			SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-            SDL_RenderCopy(renderer, textTexture, NULL, &rect);
+			SDL_Texture* textTexture = SDL_CreateTextureFromSurface(_renderer, textSurface);
+            SDL_RenderCopy(_renderer, textTexture, NULL, &rect);
             SDL_FreeSurface(textSurface);
             SDL_DestroyTexture(textTexture);
         }
     }
-	SDL_RenderPresent(renderer);
+	SDL_RenderPresent(_renderer);
 }
 
 int main(int argc, char** argv)
@@ -299,7 +308,7 @@ int main(int argc, char** argv)
 										  HEIGHT,
 										  SDL_WINDOW_RESIZABLE);
 
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
 	// TODO: Reimplement set icon function.
 	//SDL_WM_SetIcon(SDL_LoadBMP("DrumPads.bmp"), NULL);
