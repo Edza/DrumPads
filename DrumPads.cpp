@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "SDL/include/SDL.h"
-#undef main
+//#include "SDL/include/SDL.h"
+//#undef main
 #include "SDL/SDL_mixer.h"
 #include "SDL/SDL_image.h"
 #include "SDL/SDL_ttf.h"
@@ -30,11 +30,14 @@ int _sampleBlockSize = 1024;
 SDL_Texture* _pad;
 TTF_Font* font;
 
+// TODO: If there's a demo version, only use the fixed file list.
 #ifdef DEMO
 #define NUM_WAVEFORMS 30
 #define NUM_PADS 4
 #define NUM_PADS_WIDE 2
 #define NUM_PADS_HIGH 2
+
+// TODO: Enumerate these manually.
 const char* _waveFileNames[] = 
 {
 "samples//Clap-1.wav",
