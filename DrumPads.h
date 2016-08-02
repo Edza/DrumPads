@@ -1,0 +1,128 @@
+#ifndef _DRUMPADS_H_
+#define _DRUMPADS_H_
+
+//#define BUFFERLENGTH 256
+//#define SAMPLE_RATE (44100)
+//#define MINIPANELWIDTH 120
+//#define MINIPANELHEIGHT 100
+
+/*!
+ * Includes
+ */
+//#ifndef VST
+//#include "AudioSettingsInterface.h"
+//#include "MidiSettingsInterface.h"
+//#include "portaudio.h"
+//#else
+//#include "aeffectx.h"
+//#include "audioeffectx.h"
+//#endif
+#include "DrumCallback.h"
+#include "wxDrumPad.h"
+
+#define INITGUID
+
+#define MAX_PADS 12
+
+/*!
+ * Control identifiers
+ */
+#define ID_DRUMPADS_DLG 10000
+#define SYMBOL_DRUMPADS_STYLE wxCAPTION|wxSYSTEM_MENU|wxCLOSE_BOX|wxWANTS_CHARS|wxMINIMIZE_BOX
+#define SYMBOL_DRUMPADS_TITLE _("DrumPads")
+#define SYMBOL_DRUMPADS_IDNAME ID_DRUMPADS_DLG
+#define SYMBOL_DRUMPADS_SIZE wxSize(400, 300)
+#define SYMBOL_DRUMPADS_POSITION wxDefaultPosition
+#define ID_BANKSPIN 10001
+#define ID_PATCHSPIN 10003
+#define ID_DRUMPADS1 10006
+#define ID_DRUMPADS2 10007
+#define ID_DRUMPADS3 10008
+#define ID_DRUMPADS4 10009
+#define ID_DRUMPADS5 10010
+#define ID_DRUMPADS6 10011
+#define ID_DRUMPADS7 10012
+#define ID_PATCHTEXT 10013
+#define ID_CHANNELTEXT 10014
+#define ID_PITCHWHEEL 10015
+#define ID_MODWHEEL 10016
+#define ID_PANICBUTTON 10017
+#define ID_INFOBUTTON 10018
+#define ID_HELPBUTTON 10019
+#define ID_SAVEBUTTON 10021
+#define ID_LOADBUTTON 10022
+#define ID_MIDIBUTTON 10023
+#define ID_BANKTEXT 10025
+#define ID_VOLUME_LEFT 10027
+#define ID_VOLUME_RIGHT 10028
+#define ID_FILTERBUTTON 10029
+#define ID_ADSRBUTTON 10030
+#define ID_PARAMETERSBUTTON 10031
+#define ID_LFOBUTTON 10032
+#define ID_INITIALWAVE_PANEL 10033
+#define ID_FINALWAVE_PANEL 10034
+#define ID_BUTTON_NORMALIZE 10035
+#define ID_BUTTON_INITIAL 10036
+#define ID_BUTTON_FINAL 10037
+#define ID_BUTTON_CLEAR 10038
+#define ID_BUTTON_GENERATE 10039
+#define ID_CHOICE_WAVEFORM 10040
+#define ID_ZOOM_LEVEL 10041
+#define ID_BUTTON_LEFT 10042
+#define ID_BUTTON_RIGHT 10043
+#define ID_LFO_FREQUENCY 10044
+#define ID_LFO_WAVEFORM 10045
+#define ID_TXT_FREQUENCY 10046
+#define ID_ADSR_ATTACK 10047
+#define ID_ADSR_DECAY 10048
+#define ID_ADSR_SUSTAIN 10049
+#define ID_ADSR_RELEASE 10050
+#define ID_TXT_ATTACK 10051
+#define ID_TXT_DECAY 10052
+#define ID_TXT_SUSTAIN 10053
+#define ID_TXT_RELEASE 10054
+#define ID_BUTTON_SETTINGS 10055
+
+/*!
+ * Compatibility
+ */
+#ifndef wxCLOSE_BOX
+#define wxCLOSE_BOX 0x1000
+#endif
+
+#ifndef VST
+//class DrumPads: public wxDialog, public DrumCallback, public MidiSettingsInterface, public AudioSettingsInterface
+class DrumPads: public wxDialog, public DrumCallback
+#else
+class DrumPads: public wxDialog, public DrumCallback, public AudioEffectX
+#endif
+{
+    DECLARE_DYNAMIC_CLASS( DrumPads )
+    DECLARE_EVENT_TABLE()
+public:
+    virtual ~DrumPads();
+    /// Creation
+    bool Create( wxWindow* parent, wxWindowID id = SYMBOL_DRUMPADS_IDNAME, const wxString& caption = SYMBOL_DRUMPADS_TITLE, const wxPoint& pos = SYMBOL_DRUMPADS_POSITION, const wxSize& size = SYMBOL_DRUMPADS_SIZE, long style = SYMBOL_DRUMPADS_STYLE );
+    void CreateControls();
+    void OnCloseWindow( wxCloseEvent& event );
+#ifndef VST
+    DrumPads();
+    DrumPads(wxWindow* parent, wxWindowID id = SYMBOL_DRUMPADS_IDNAME, const wxString& caption = SYMBOL_DRUMPADS_TITLE, const wxPoint& pos = SYMBOL_DRUMPADS_POSITION, const wxSize& size = SYMBOL_DRUMPADS_SIZE, long style = SYMBOL_DRUMPADS_STYLE );
+#else
+    DrumPads();
+#endif
+    //void SendMidiMessage( unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4, bool shortmsg = false );
+    // DrumCallback members.
+    void PlayNote( int note, bool receivedFromMidi = false );
+    void ArrowClicked( int note );
+    //void StopNote( int note, bool receivedFromMidi = false );
+    //void AllNotesOff( bool receivedFromMidi = false );
+    //void ProcessMidiMessage(unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4);
+	bool _done;
+private:
+    wxDrumPad* _pads[MAX_PADS];
+    wxIcon _icon;
+    int _sampleRate;
+};
+
+#endif

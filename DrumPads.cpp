@@ -2,17 +2,27 @@
 
 //#include "SDL/include/SDL.h"
 //#undef main
-#include "SDL/SDL_mixer.h"
-#include "SDL/SDL_image.h"
-#include "SDL/SDL_ttf.h"
 #ifndef WIN32
+// Requires libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev
+#include "SDL2/SDL_mixer.h"
+#include "SDL2/SDL_image.h"
+#include "SDL2/SDL_ttf.h"
 #include <unistd.h>
 #include <syslog.h>
 #include <string.h>
 #else
+#include "SDL/SDL_mixer.h"
+#include "SDL/SDL_image.h"
+#include "SDL/SDL_ttf.h"
 #include "Windows.h"
 #endif
 #include <math.h>
+#include "DrumPads.h"
+
+IMPLEMENT_DYNAMIC_CLASS( DrumPads, wxDialog )
+
+BEGIN_EVENT_TABLE( DrumPads, wxDialog )
+END_EVENT_TABLE()
 
 #ifdef DEMO
 #define HEIGHT 512
@@ -287,7 +297,7 @@ void Display(void)
 	SDL_RenderPresent(_renderer);
 }
 
-int main(int argc, char** argv)
+int old_main(int argc, char** argv)
 {
 #ifndef linux
 #ifndef _DEBUG
@@ -459,3 +469,24 @@ int main(int argc, char** argv)
     SDL_Quit();
     return 0;
 }
+
+DrumPads::DrumPads()
+{
+}
+
+DrumPads::DrumPads(wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
+{
+}
+
+DrumPads::~DrumPads()
+{
+}
+
+void DrumPads::PlayNote( int note, bool receivedFromMidi )
+{
+}
+
+void DrumPads::ArrowClicked( int note )
+{
+}
+

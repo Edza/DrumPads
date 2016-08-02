@@ -4,17 +4,18 @@
 #include <wx/wx.h>
 #include <wx/sizer.h>
 #include <wx/bitmap.h>
-#include DrumCallback* _parent;
+#include "DrumCallback.h"
 
 class wxDrumPad : public wxControl
 {
 private:
 
     wxString _text;
-    wxString _arrowEnabled;
-    wxString _width;
-    wxString _height;
+    bool _arrowEnabled;
+    int _width;
+    int _height;
     wxBitmap _bitmap; // background
+    wxBitmap _arrowBitmap; // Arrow
     int _midiNote; // Parent's job to translate MIDI note into pad number or whatever.
     bool _triggered; // Optional. In case we want to indicate it was triggered.
     DrumCallback* _parent;
@@ -28,16 +29,16 @@ private:
 public:
 
     wxDrumPad();
-    wxDrumPad(wxWindow* parent, wxString* text, wxWindowID id, wxBitmap bitmap, int baseNote, DrumCallback* callback,
+    wxDrumPad(wxWindow* parent, wxString& text, wxWindowID id, wxBitmap bitmap, int baseNote, DrumCallback* callback,
         const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxDefaultSize, long style = wxNO_BORDER );
-    void Create( wxWindow* parent, wxString* text, wxWindowID id, wxBitmap bitmap, int baseNote, OctaveCallback* parentDlg,
+    void Create( wxWindow* parent, wxString& text, wxWindowID id, wxBitmap bitmap, int baseNote, DrumCallback* parentDlg,
         const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxDefaultSize, long style = wxNO_BORDER );
     void OnClick( wxMouseEvent &event );
     void OnRelease( wxMouseEvent &event );
     void OnRightClick( wxMouseEvent& event );
     void EnableArrow( bool enabled );
-    void SetText( wxString* text );
+    void SetText( wxString& text );
 
-}
+};
 
 #endif

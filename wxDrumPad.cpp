@@ -7,10 +7,10 @@ BEGIN_EVENT_TABLE(wxDrumPad,wxControl)
     EVT_RIGHT_DOWN(wxDrumPad::OnRightClick)
 END_EVENT_TABLE()
 
-wxDrumPad::wxDrumPad( wxWindow* parent, wxWindowID id, wxBitmap bitmap, int baseNote, DrumCallback* callback,
+wxDrumPad::wxDrumPad( wxWindow* parent, wxString& text, wxWindowID id, wxBitmap bitmap, int baseNote, DrumCallback* callback,
 		const wxPoint &pos, const wxSize &size, long style )
 {
-    Create( parent, id, bitmap, baseNote, callback, pos, size, style );
+    Create( parent, text, id, bitmap, baseNote, callback, pos, size, style );
 }
 
 wxDrumPad::wxDrumPad() : wxControl()
@@ -20,7 +20,7 @@ wxDrumPad::wxDrumPad() : wxControl()
     _width = 256;
     _height = 256;
     _midiNote = 36;
-    _triggered = False;
+    _triggered = false;
     _parent = NULL;
 }
 
@@ -28,9 +28,9 @@ void wxDrumPad::OnClick( wxMouseEvent& event )
 {
     wxPoint location = event.GetPosition();
     // Determine whether we've clicked on the arrow and whether it matters.
-    if( location < ((_width * 3) / 4) || location > ((_height * 1) / 4))
+    if( location.x < ((_width * 3) / 4) || location.y > ((_height * 1) / 4))
     {
-        NoteOn(note);
+        NoteOn();
     }
     else
     {
@@ -40,7 +40,7 @@ void wxDrumPad::OnClick( wxMouseEvent& event )
         }
         else
         {
-            NoteOn(note);
+            NoteOn();
         }
     }
     event.Skip();
@@ -48,7 +48,7 @@ void wxDrumPad::OnClick( wxMouseEvent& event )
     return;
 }
 
-void wxDrumPad::OnOctaveRelease( wxMouseEvent& )
+void wxDrumPad::OnRelease( wxMouseEvent& )
 {
     // Do nothing -- all samples play all the way through.
     //TurnOffAll();
@@ -57,21 +57,21 @@ void wxDrumPad::OnOctaveRelease( wxMouseEvent& )
     return;
 }
 
-void wxDrumPad::Create (wxWindow* parent, wxString* text, wxWindowID id, wxBitmap bitmap, int baseNote, DrumCallback* callback,
+void wxDrumPad::Create (wxWindow* parent, wxString& text, wxWindowID id, wxBitmap bitmap, int baseNote, DrumCallback* callback,
                      const wxPoint &pos, const wxSize &size, long style)
 {
     _text = text;
     _arrowEnabled = true;
-    _width = size.w;
-    _height = size.h;
-    _triggered = False;
+    _width = size.GetWidth();
+    _height = size.GetHeight();
+    _triggered = false;
     _bitmap = bitmap;
     _midiNote = baseNote;
     _parent = callback;
     wxControl::Create (parent, id, pos, size, style);
 }
 
-void wxDrumPad::SetText( wxString* text )
+void wxDrumPad::SetText( wxString& text )
 {
     _text = text;
     Refresh();
@@ -82,20 +82,20 @@ void wxDrumPad::OnPaint(wxPaintEvent&)
     wxPaintDC dc(this);
     dc.DrawBitmap( _bitmap, 0, 0, true );
     dc.DrawBitmap( _arrowBitmap, ((_width * 3) / 4), ((_height) / 4), true);
-    dc.DrawText(_text, 8, 8, true);
+    dc.DrawText(_text, 8, 8);
     // TODO: Draw something special on each key if a specific note is playing.
 }
 
-void wxDrumPad::NoteOn( int note )
+void wxDrumPad::NoteOn()
 {
-    _parent->PlayNote(_baseNote);
+    _parent->PlayNote(_midiNote);
     // Not necessary: Parent turns on indicator.
     //NoteIndicatorOn( note );
 }
 
-void wxDrumPad::NoteOff( int note )
+void wxDrumPad::NoteOff()
 {
-    //_parent->StopNote( _baseNote + note );
+    //_parent->StopNote( _midiNote + note );
     //NoteIndicatorOff( note );
 }
 
@@ -106,5 +106,5 @@ void wxDrumPad::OnRightClick( wxMouseEvent& event )
 
 wxSize wxDrumPad::DoGetBestSize () const
 {
-	return wxSize(_width, _height);
+    return wxSize(_width, _height);
 }
