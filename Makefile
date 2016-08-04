@@ -7,13 +7,13 @@ WX_CONFIG := /usr/bin/wx-config
 PROGRAM = DrumPads
 
 # Directory containing library portions of code.
-INCLUDEDIR2 = /usr/local/include
+INCLUDEDIR2 = /usr/include
 # To switch to rtmidi 2.1, we need to change the error handling in wxkeyboard.cpp and also find a way to get MIDI devices
 # to work, because they don't in 2.1 for some reason. Something to do with the dummy device, according to an error.
 #INCLUDEDIR = /usr/include/SDL2
 INCLUDEDIR3 = rtmidi-2.1.0
 #INCLUDEDIR3 = rtmidi-1.0.11
-LIBDIR = /usr/local/lib
+LIBDIR = /usr/lib
 
 # Object files
 #OBJECTS = wxDrumPad.o DrumPads.o DrumPadsApp.o $(INCLUDEDIR3)/RtMidi.o

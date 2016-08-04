@@ -7,10 +7,10 @@ BEGIN_EVENT_TABLE(wxDrumPad,wxControl)
     EVT_RIGHT_DOWN(wxDrumPad::OnRightClick)
 END_EVENT_TABLE()
 
-wxDrumPad::wxDrumPad( wxWindow* parent, wxString& text, wxWindowID id, wxBitmap bitmap, int baseNote, DrumCallback* callback,
+wxDrumPad::wxDrumPad( wxWindow* parent, wxString& text, wxBitmap* bitmap, wxBitmap* arrowBitmap, int baseNote, DrumCallback* callback, wxWindowID id, 
 		const wxPoint &pos, const wxSize &size, long style )
 {
-    Create( parent, text, id, bitmap, baseNote, callback, pos, size, style );
+    Create( parent, text, bitmap, arrowBitmap, baseNote, callback, id, pos, size, style );
 }
 
 wxDrumPad::wxDrumPad() : wxControl()
@@ -57,8 +57,8 @@ void wxDrumPad::OnRelease( wxMouseEvent& )
     return;
 }
 
-void wxDrumPad::Create (wxWindow* parent, wxString& text, wxWindowID id, wxBitmap bitmap, int baseNote, DrumCallback* callback,
-                     const wxPoint &pos, const wxSize &size, long style)
+void wxDrumPad::Create (wxWindow* parent, wxString& text, wxBitmap* bitmap, wxBitmap* arrowBitmap, int baseNote, DrumCallback* callback,
+                     wxWindowID id, const wxPoint &pos, const wxSize &size, long style)
 {
     _text = text;
     _arrowEnabled = true;
@@ -66,6 +66,7 @@ void wxDrumPad::Create (wxWindow* parent, wxString& text, wxWindowID id, wxBitma
     _height = size.GetHeight();
     _triggered = false;
     _bitmap = bitmap;
+    _arrowBitmap = arrowBitmap;
     _midiNote = baseNote;
     _parent = callback;
     wxControl::Create (parent, id, pos, size, style);
@@ -80,8 +81,8 @@ void wxDrumPad::SetText( wxString& text )
 void wxDrumPad::OnPaint(wxPaintEvent&)
 {
     wxPaintDC dc(this);
-    dc.DrawBitmap( _bitmap, 0, 0, true );
-    dc.DrawBitmap( _arrowBitmap, ((_width * 3) / 4), ((_height) / 4), true);
+    dc.DrawBitmap( *_bitmap, 0, 0, true );
+    dc.DrawBitmap( *_arrowBitmap, ((_width * 3) / 4), ((_height) / 4), true);
     dc.DrawText(_text, 8, 8);
     // TODO: Draw something special on each key if a specific note is playing.
 }

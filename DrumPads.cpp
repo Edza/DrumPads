@@ -4,212 +4,28 @@
 //#undef main
 #ifndef WIN32
 // Requires libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev
-#include "SDL2/SDL_mixer.h"
-#include "SDL2/SDL_image.h"
-#include "SDL2/SDL_ttf.h"
 #include <unistd.h>
 #include <syslog.h>
 #include <string.h>
 #else
-#include "SDL/SDL_mixer.h"
-#include "SDL/SDL_image.h"
-#include "SDL/SDL_ttf.h"
 #include "Windows.h"
 #endif
 #include <math.h>
 #include "DrumPads.h"
+#include "wx/dir.h"
 
 IMPLEMENT_DYNAMIC_CLASS( DrumPads, wxDialog )
 
 BEGIN_EVENT_TABLE( DrumPads, wxDialog )
+    EVT_CLOSE( DrumPads::OnCloseWindow )
+    EVT_KEY_DOWN( DrumPads::OnKeyDown )
+    EVT_KEY_UP( DrumPads::OnKeyUp )
+    EVT_LEFT_UP(DrumPads::OnMouseRelease) // Catches note off outside of an octave control    
 END_EVENT_TABLE()
 
-#ifdef DEMO
-#define HEIGHT 512
-#define WIDTH 512
-#else
-#define HEIGHT 768
-#define WIDTH 1024
-#endif
-
-//SDL_Surface* Surface;               // Screen surface to retrieve width/height information
-SDL_Renderer *_renderer;
-SDL_Surface* bg;
-int _sampleRate = 44100;
-int _sampleBlockSize = 1024;
-SDL_Texture* _pad;
-TTF_Font* font;
-
-// TODO: If there's a demo version, only use the fixed file list.
-#ifdef DEMO
-#define NUM_WAVEFORMS 30
-#define NUM_PADS 4
-#define NUM_PADS_WIDE 2
-#define NUM_PADS_HIGH 2
-
-// TODO: Enumerate these manually.
-const char* _waveFileNames[] = 
-{
-"samples//Clap-1.wav",
-"samples//Clap-2.wav",
-"samples//Closed-Hi-Hat-1.wav", // 2
-"samples//Closed-Hi-Hat-2.wav",
-"samples//Cowbell-1.wav",
-"samples//Cowbell-2.wav",
-"samples//Crash-Cymbal-1.wav",
-"samples//Crash-Cymbal-2.wav",
-"samples//Doumbek-Tek.wav",
-"samples//Floor-Tom-1.wav",
-"samples//Floor-Tom-2.wav",
-"samples//Hand-Drum.wav",
-"samples//Hi-Bongo.wav",
-"samples//Hi-Tom-1.wav",
-"samples//Kick-Drum-1.wav", // 14
-"samples//Kick-Drum-2.wav",
-"samples//Kick-Drum-3.wav",
-"samples//Low-Bongo.wav",
-"samples//Low-Tom-1.wav",
-"samples//Low-Tom-2.wav",
-"samples//Mid-Tom-1.wav",
-"samples//Mid-Tom-2.wav",
-"samples//Open-Hi-Hat-1.wav", // 22
-"samples//Open-Hi-Hat-2.wav",
-"samples//Ride-Cymbal-1.wav",
-"samples//Ride-Cymbal-2.wav",
-"samples//Snare-Drum-1.wav", // 26
-"samples//Snare-Drum-2.wav",
-"samples//Snare-Drum-3.wav",
-"samples//Snare-Drum-4.wav"
-};
-#else
-#define NUM_WAVEFORMS 40
-#define NUM_PADS 12
-#define NUM_PADS_WIDE 4
-#define NUM_PADS_HIGH 3
-const char* _waveFileNames[] = 
-{
-"samples//Clap-1.wav",
-"samples//Clap-2.wav",
-"samples//Closed-Hi-Hat-1.wav",
-"samples//Closed-Hi-Hat-2.wav",
-"samples//Closed-Hi-Hat-3.wav",
-"samples//Cowbell-1.wav",
-"samples//Cowbell-2.wav",
-"samples//Crash-Cymbal-1.wav",
-"samples//Crash-Cymbal-2.wav",
-"samples//Crash-Cymbal-3.wav",
-"samples//Doumbek-Tek.wav",
-"samples//Floor-Tom-1.wav",
-"samples//Floor-Tom-2.wav",
-"samples//Hand-Drum.wav",
-"samples//Hi-Bongo.wav",
-"samples//Hi-Tom-1.wav",
-"samples//Kick-Drum-1.wav",
-"samples//Kick-Drum-2.wav",
-"samples//Kick-Drum-3.wav",
-"samples//Kick-Drum-4.wav",
-"samples//Kick-Drum-5.wav",
-"samples//Kick-Drum-6.wav",
-"samples//Low-Bongo.wav",
-"samples//Low-Tom-1.wav",
-"samples//Low-Tom-2.wav",
-"samples//Mid-Tom-1.wav",
-"samples//Mid-Tom-2.wav",
-"samples//Mid-Tom-3.wav",
-"samples//Open-Hi-Hat-1.wav",
-"samples//Open-Hi-Hat-2.wav",
-"samples//Open-Hi-Hat-3.wav",
-"samples//Ride-Cymbal-1.wav",
-"samples//Ride-Cymbal-2.wav",
-"samples//Ride-Cymbal-3.wav",
-"samples//Snare-Drum-1.wav",
-"samples//Snare-Drum-2.wav",
-"samples//Snare-Drum-3.wav",
-"samples//Snare-Drum-4.wav",
-"samples//Snare-Drum-5.wav",
-"samples//Snare-Drum-6.wav"
-};
-#endif
-Mix_Chunk* _sample[NUM_WAVEFORMS];
-unsigned int _sampleSetting[NUM_PADS];
-
-void AudioCallback(void* userdata, Uint8* stream, int len);
-
 // Initializes the application data
-int Init(void) 
+/*int Init(void) 
 {
-	IMG_Init(IMG_INIT_PNG);
-    memset(_sampleSetting, 0, sizeof(unsigned int) * NUM_PADS);
-    memset(_sample, 0, sizeof(Mix_Chunk*) * NUM_WAVEFORMS);
-    // Load drum pad graphic.
-    SDL_Surface* padImage;
-#ifndef WIN32
-	padImage = IMG_Load("images//button256witharrowblue.png");
-#else
-	padImage = IMG_Load(".\\button256witharrowblue.png");
-#endif
-
-    if( padImage == NULL )
-    {
-        printf("Failed to open button256witharrowblue.png\n");
-		printf(IMG_GetError());
-		//exit(1);
-    }
-	else
-	{
-        _pad = SDL_CreateTextureFromSurface(_renderer, padImage);
-		if( _pad != NULL )
-		{
-			printf("Pad image loaded OK. Texture created.\n");
-            int w, h;
-            int textresult = SDL_QueryTexture(_pad, NULL, NULL, &w, &h);
-            printf("QueryTexture result: %d, width: %d, height: %d\n", textresult, w, h);
-		}
-		else
-		{
-			printf("Pad image texture creation failed.\n");
-			//exit(3);
-		}
-        SDL_FreeSurface(padImage);
-	}
-
-    // Set up the audio stream
-    int result = Mix_OpenAudio(_sampleRate, AUDIO_S16SYS, 2, 512);
-    if( result < 0 )
-    {
-        fprintf(stderr, "Unable to open audio: %s\n", SDL_GetError());
-        exit(-1);
-    }
-
-    result = Mix_AllocateChannels(4);
-    if( result < 0 )
-    {
-        fprintf(stderr, "Unable to allocate mixing channels: %s\n", SDL_GetError());
-        exit(-1);
-    }
-
-#ifdef DEMO
-	_sampleSetting[0] = 2;
-	_sampleSetting[1] = 14;
-	_sampleSetting[2] = 22;
-	_sampleSetting[3] = 26;
-#else
-    for( int j = 0; j < NUM_PADS; j++ )
-    {
-        _sampleSetting[j] = j * 3;
-    }
-#endif
-
-    // Load waveforms
-    for( int i = 0; i < NUM_WAVEFORMS; i++ )
-    {
-        _sample[i] = Mix_LoadWAV(_waveFileNames[i]);
-        if( _sample[i] == NULL )
-        {
-            fprintf(stderr, "Unable to load wave file: %s\n", _waveFileNames[i]);
-        }
-    }
-
     // Set up font.
     TTF_Init();
 #ifndef WIN32
@@ -231,255 +47,29 @@ int Init(void)
 
     return true;
 }
+*/
 
-// Audio processing function.
-void AudioCallback(void* userdata, Uint8* stream, int len)
+DrumPads::DrumPads()
 {
-    unsigned int count;
-    short value;
-    double tmpval;
-    short* buffer = (short *)stream;
-    // This requires that all samples in a single buffer pass have the same volume.
-    // If we want realtime volume, we will have to move this calculation into the loop
-    // at "Put the value in the buffer".  Won't really matter because filling the buffer
-    // is faster than realtime.
-
-    for(int i = 0; i < (len/2); i+=2 )
-    {
-        // Calculate sample data.
-        //tmpval = ((_waveTable->_waveformTable[_selectedWaveform][(int)(_phase * TABLESIZE)] * (1.0 - _vibratoDepth)) +
-        //    (_waveTable->_waveformTable[_modulationWaveform][(int)(_vibratoPhase * TABLESIZE)] * _vibratoDepth ));
-
-        // Put value in the buffer.
-        //buffer[i] = (short)(tmpval * volumeModifier);
-        buffer[i] = 0;
-
-    }
+    memset(_pads, 0, (sizeof(wxDrumPad) * MAX_PADS));
 }
 
-// Main-loop workhorse function for displaying the object
-void Display(void)
+DrumPads::DrumPads(wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
 {
-	SDL_RenderClear(_renderer);
-    SDL_Rect rect;
-    SDL_Surface* textSurface;
-    SDL_Color foregroundColor = { 192, 204, 255 };
-    SDL_Color backgroundColor = { 0, 41, 102 };
-    for( int i = 0; i < NUM_PADS_WIDE; i++ )
-    {
-        for( int j = 0; j < NUM_PADS_HIGH; j++ )
-        {
-            rect.x = i * 256;
-            rect.y = j * 256;
-            rect.w = 256;
-            rect.h = 256;
-			if( _pad == NULL )
-			{
-				//exit(2);
-			}
-            int result = SDL_RenderCopy(_renderer, _pad, NULL, &rect);
-            if( result != 0 )
-            {
-                printf("Square %d, %d render error: %s\n", i, j, SDL_GetError());
-                //exit(-1);
-            }
-            textSurface = TTF_RenderText_Shaded(font, &(_waveFileNames[_sampleSetting[(j * NUM_PADS_WIDE + i)]][9]), foregroundColor, backgroundColor);
-            rect.x += 16;
-            rect.y += 16;
-			rect.w = textSurface->w;
-			rect.h = textSurface->h;
-			SDL_Texture* textTexture = SDL_CreateTextureFromSurface(_renderer, textSurface);
-            SDL_RenderCopy(_renderer, textTexture, NULL, &rect);
-            SDL_FreeSurface(textSurface);
-            SDL_DestroyTexture(textTexture);
-        }
-    }
-	SDL_RenderPresent(_renderer);
+    memset(_pads, 0, (sizeof(wxDrumPad) * MAX_PADS));
+    Create(parent, id, caption, pos, size, style);
 }
 
-int old_main(int argc, char** argv)
+DrumPads::~DrumPads()
 {
-#ifndef linux
-#ifndef _DEBUG
-	HWND windowHandle = GetConsoleWindow();
-	ShowWindow(windowHandle, SW_HIDE);
-#endif
-#endif
-
-    // Initialize the SDL library with the Video subsystem
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO );
-    atexit(SDL_Quit);
-
-	int width  = 640;
-	int height = 480;
-
-	// Probably don't want a resizable window...
-	SDL_Window* window = SDL_CreateWindow("DrumPads",
-										  SDL_WINDOWPOS_UNDEFINED,
-										  SDL_WINDOWPOS_UNDEFINED,
-										  WIDTH,
-										  HEIGHT,
-										  SDL_WINDOW_RESIZABLE);
-
-	_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-	// TODO: Reimplement set icon function.
-	//SDL_WM_SetIcon(SDL_LoadBMP("DrumPads.bmp"), NULL);
-
-    // Application specific Initialize of data structures & GL states
-    if (Init() == false)
-        return -1;
-
-    // Event descriptor
-    SDL_Event Event;
-    bool paused = false;
-
-    bool done = false;
-    while (!done)
-    {
-        // Render our scene
-        Display();
-
-        bool gotEvent;
-        if (paused)
-        {
-            SDL_WaitEvent(&Event);
-            gotEvent = true;
-        }
-        else 
-        {
-            gotEvent = SDL_PollEvent(&Event);
-        }
-
-        while (!done && gotEvent) 
-        {
-            switch (Event.type) 
-            {
-                case SDL_MOUSEBUTTONDOWN:
-                    {
-                        int pad = ( Event.button.x / 256) + ((Event.button.y / 256) * NUM_PADS_WIDE);
-#ifndef WIN32
-                        syslog(LOG_INFO, "Mouse Button X: %d, Y: %d, Pad: %d", Event.button.x, Event.button.y, pad);
-#endif
-                        if( (Event.button.x % 256 > 191) && (Event.button.y % 256 < 64))
-                        {
-#ifndef WIN32
-                            syslog(LOG_INFO, "Next sample clicked.");
-#endif
-                            _sampleSetting[pad] = (_sampleSetting[pad] + 1) % NUM_WAVEFORMS;
-                        }
-                        else
-                        {
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[pad]], 0);
-                        }
-                    }
-                    break;
-                // TODO: Allow playing drums via the bluetooth keyboard.
-                case SDL_KEYDOWN:
-                    switch (Event.key.keysym.sym) 
-                    {
-                        case 'q':
-                        case 't':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[0]], 0);
-                            break;
-                        case 'w':
-                        case 'y':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[1]], 0);
-                            break;
-                        case 'e':
-                        case 'u':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[2]], 0);
-                            break;
-                        case 'r':
-                        case 'i':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[3]], 0);
-                            break;
-#ifndef DEMO
-                        case 'a':
-                        case 'g':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[4]], 0);
-                            break;
-                        case 's':
-                        case 'h':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[5]], 0);
-                            break;
-                        case 'd':
-                        case 'j':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[6]], 0);
-                            break;
-                        case 'f':
-                        case 'k':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[7]], 0);
-                            break;
-                        case 'z':
-                        case 'b':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[8]], 0);
-                            break;
-                        case 'x':
-                        case 'n':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[9]], 0);
-                            break;
-                        case 'c':
-                        case 'm':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[10]], 0);
-                            break;
-                        case 'v':
-                        case ',':
-                            Mix_PlayChannel(-1, _sample[_sampleSetting[11]], 0);
-                            break;
-#endif
-                        default:
-                            break;
-                    }
-                    break;
-
-				// TODO: Figure out what pause logic to use.
-                case SDL_WINDOWEVENT:
-					if( Event.window.event == SDL_WINDOWEVENT_SHOWN )
-					{
-                        //paused = !Event.active.gain;
-					}
-                    break;
-
-                case SDL_QUIT:
-                    // We exit anytime we get a request to quit the app
-                    // all shutdown code is registered via atexit() so this is clean.
-                    done = true;
-                    break;
-
-                default:
-                    break;
-            }
-            if( !done ) gotEvent = SDL_PollEvent(&Event);
-        }
-#ifndef WIN32
-		usleep(3000);
-#else
-		Sleep(3);
-#endif
-    }
-
-    for( int i = 0; i < NUM_WAVEFORMS; i++ )
+    for( int i = 0; i < NUM_PADS; i++ )
     {
         Mix_FreeChunk(_sample[i]);
     }
 
     Mix_CloseAudio();
-	IMG_Quit();
+    
     SDL_Quit();
-    return 0;
-}
-
-DrumPads::DrumPads()
-{
-}
-
-DrumPads::DrumPads(wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
-{
-}
-
-DrumPads::~DrumPads()
-{
 }
 
 void DrumPads::PlayNote( int note, bool receivedFromMidi )
@@ -490,3 +80,239 @@ void DrumPads::ArrowClicked( int note )
 {
 }
 
+bool DrumPads::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
+{
+    wxDialog::Create( parent, id, caption, pos, size, style );
+
+    CreateControls();
+    Centre();
+    if( _icon.LoadFile(_T("DrumPads.ico"), wxBITMAP_TYPE_ICO ))
+    {
+        SetIcon(_icon);
+    }
+    InitializeAudio();
+    
+    return true;
+}
+ 
+bool DrumPads::CreateControls()
+{
+    wxGridSizer* sizer = new wxGridSizer(NUM_PADS_WIDE, NUM_PADS_HIGH, 0, 0);
+    this->SetSizer(sizer);
+
+    // Load images.
+#ifndef WIN32
+        _padImage = new wxBitmap(wxString(_("images//button256blue.png")));
+        _arrowImage = new wxBitmap(wxString(_("images//arrowblue.png")));
+#else
+        _padImage = new wxBitmap(wxString(_(".\\button256blue.png")));
+        _arrowImage = new wxBitmap(wxString(_(".\\arrowblue.png")));
+#endif
+
+    if( _padImage == NULL )
+    {
+        printf("Failed to open button256witharrowblue.png\n");
+    }
+
+    // Create pads.
+    wxString title = wxString(_("Empty"));
+    for( int i = 0; i < MAX_PADS; i++ )
+    {
+        _pads[i] = new wxDrumPad(this, title, _padImage, _arrowImage, 36+i, this, 500+i, wxPoint(0,0), wxSize(256,256));
+        sizer->Add(_pads[i], 0, i % NUM_PADS_WIDE, i / NUM_PADS_WIDE);
+    }
+    
+    GetSizer()->Fit(this);
+    GetSizer()->SetSizeHints(this);
+}
+
+bool DrumPads::InitializeAudio()
+{
+    _sampleRate = 44100;
+    _sampleBlockSize = 1024;
+    // Initialize the SDL library with the Video subsystem
+    SDL_Init(SDL_INIT_AUDIO);
+    atexit(SDL_Quit);
+
+    // Set up the audio stream
+    int result = Mix_OpenAudio(_sampleRate, AUDIO_S16SYS, 2, 512);
+    if( result < 0 )
+    {
+        fprintf(stderr, "Unable to open audio: %s\n", SDL_GetError());
+        exit(-1);
+    }
+
+    result = Mix_AllocateChannels(4);
+    if( result < 0 )
+    {
+        fprintf(stderr, "Unable to allocate mixing channels: %s\n", SDL_GetError());
+        exit(-1);
+    }
+    
+    // Build wave file list.
+    wxDir dir;
+    wxString filename;
+    int numFound = 0;
+    if( dir.Open(wxString(_("./samples"))) )
+    {
+        bool cont = dir.GetFirst(&filename, wxString(_("*.wav")), wxDIR_FILES);
+        while(true)
+        {
+            wprintf(_("Found %s\n"), filename.c_str());
+            _waveFileNames.Add(filename);
+            ++numFound;
+            cont = dir.GetNext(&filename);
+            if( cont >= NUM_WAVEFORMS )
+            {
+                break;
+            }
+        }
+    }
+    printf("Found %d samples.\n", numFound);
+    
+#ifdef DEMO
+        _sampleSetting[0] = 2;
+        _sampleSetting[1] = 14;
+        _sampleSetting[2] = 22;
+        _sampleSetting[3] = 26;
+#else
+    for( int j = 0; j < NUM_PADS; j++ )
+    {
+        _sampleSetting[j] = j * 3;
+    }
+#endif
+
+    // Load waveforms - only the ones assigned to pads. If we change waveforms, unload and reload in that code.
+    for( int i = 0; i < NUM_WAVEFORMS; i++ )
+    {
+        _sample[i] = Mix_LoadWAV(_waveFileNames[_sampleSetting[i]].mb_str().data());
+        if( _sample[i] == NULL )
+        {
+            wprintf(_("Unable to load wave file: %s\n"), _waveFileNames[_sampleSetting[i]].c_str());
+        }
+    }
+    
+    return true;
+}
+
+/**
+* Handles window close events.
+*/
+void DrumPads::OnCloseWindow( wxCloseEvent& event )
+{
+    this->Destroy();
+    event.Skip();
+}
+
+// Process keyboard key and get the pad number it triggers. Don't play the sample, just return the pad id.
+int DrumPads::GetPadNumber(int key)
+{
+    switch (key) 
+    {
+        case 'q':
+        case 't':
+            return 0;
+            break;
+        case 'w':
+        case 'y':
+            return 1;
+            break;
+        case 'e':
+        case 'u':
+            return 2;
+            break;
+        case 'r':
+        case 'i':
+            return 3;
+            break;
+#ifndef DEMO
+        case 'a':
+        case 'g':
+            return 4;
+            break;
+        case 's':
+        case 'h':
+            return 5;
+            break;
+        case 'd':
+        case 'j':
+            return 6;
+            break;
+        case 'f':
+        case 'k':
+            return 7;
+            break;
+        case 'z':
+        case 'b':
+            return 8;
+            break;
+        case 'x':
+        case 'n':
+            return 9;
+            break;
+        case 'c':
+        case 'm':
+            return 10;
+            break;
+        case 'v':
+        case ',':
+            return 11;
+            break;
+#endif
+        default:
+            break;    
+    }
+    return -1;
+}
+
+/**
+* Handles key down events.
+*/
+void DrumPads::OnKeyDown( wxKeyEvent& event )
+{
+    int key = event.GetKeyCode();
+    // Tab navigation explicitly disabled.
+    if( key == WXK_TAB )
+    {
+        return;
+    }
+    int padnumber = GetPadNumber( key );
+    if( padnumber == -1 )
+    {
+        event.Skip(true);
+        return;
+    }
+    // Always retrigger.
+    Mix_PlayChannel(-1, _sample[padnumber], 0);    
+    // TODO: Send the MIDI note if necessary.
+    //PlayNote( note );
+    event.Skip(true);
+}
+
+/**
+* Handles key up events, turns off a playing note.
+*/
+void DrumPads::OnKeyUp( wxKeyEvent& event )
+{
+    /*
+    // Not necessary because all samples are one-shots that play all the way through.
+    int key = event.GetKeyCode();
+    int note = GetNoteValue( key );
+    if( note == 0 )
+    {
+            event.Skip(true);
+            return;
+    }
+    StopNote( note );
+    */
+    event.Skip(true);
+}
+
+/**
+* Handles release of the left mouse button.
+*/
+void DrumPads::OnMouseRelease( wxMouseEvent& event )
+{
+    //AllNotesOff();
+    event.Skip();
+}

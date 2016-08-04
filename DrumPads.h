@@ -90,12 +90,31 @@
 #define wxCLOSE_BOX 0x1000
 #endif
 
-#ifndef VST
+// Demo is restricted. Num pads and max pads are different because maybe that's configurable via settings.
+#ifdef DEMO
+#define NUM_WAVEFORMS 30
+#define NUM_PADS 4
+#define MAX_PADS 4
+#define NUM_PADS_WIDE 2
+#define NUM_PADS_HIGH 2
+#else
+#define NUM_WAVEFORMS 25000
+#define NUM_PADS 12
+#define MAX_PADS 12
+#define NUM_PADS_WIDE 4
+#define NUM_PADS_HIGH 3
+#endif
+
+#ifndef WIN32
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_mixer.h"
+#else
+#include "SDL/SDL.h"
+#include "SDL/SDL_mixer.h"
+#endif
+
 //class DrumPads: public wxDialog, public DrumCallback, public MidiSettingsInterface, public AudioSettingsInterface
 class DrumPads: public wxDialog, public DrumCallback
-#else
-class DrumPads: public wxDialog, public DrumCallback, public AudioEffectX
-#endif
 {
     DECLARE_DYNAMIC_CLASS( DrumPads )
     DECLARE_EVENT_TABLE()
@@ -103,26 +122,34 @@ public:
     virtual ~DrumPads();
     /// Creation
     bool Create( wxWindow* parent, wxWindowID id = SYMBOL_DRUMPADS_IDNAME, const wxString& caption = SYMBOL_DRUMPADS_TITLE, const wxPoint& pos = SYMBOL_DRUMPADS_POSITION, const wxSize& size = SYMBOL_DRUMPADS_SIZE, long style = SYMBOL_DRUMPADS_STYLE );
-    void CreateControls();
+    bool CreateControls();
+    bool InitializeAudio();
     void OnCloseWindow( wxCloseEvent& event );
-#ifndef VST
+    void OnKeyDown( wxKeyEvent& event );
+    void OnKeyUp( wxKeyEvent& event );
+    void OnMouseRelease( wxMouseEvent &event );  
     DrumPads();
     DrumPads(wxWindow* parent, wxWindowID id = SYMBOL_DRUMPADS_IDNAME, const wxString& caption = SYMBOL_DRUMPADS_TITLE, const wxPoint& pos = SYMBOL_DRUMPADS_POSITION, const wxSize& size = SYMBOL_DRUMPADS_SIZE, long style = SYMBOL_DRUMPADS_STYLE );
-#else
-    DrumPads();
-#endif
     //void SendMidiMessage( unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4, bool shortmsg = false );
     // DrumCallback members.
     void PlayNote( int note, bool receivedFromMidi = false );
+    int GetPadNumber(int key);
     void ArrowClicked( int note );
     //void StopNote( int note, bool receivedFromMidi = false );
     //void AllNotesOff( bool receivedFromMidi = false );
     //void ProcessMidiMessage(unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4);
 	bool _done;
 private:
-    wxDrumPad* _pads[MAX_PADS];
+    wxDrumPad* _pads[MAX_PADS];  
+    Mix_Chunk* _sample[NUM_PADS];
+    unsigned int _sampleSetting[NUM_PADS];
+    wxArrayString _waveFileNames;
+    wxBitmap* _padImage;
+    wxBitmap* _arrowImage;
+    
     wxIcon _icon;
     int _sampleRate;
+    int _sampleBlockSize;
 };
 
 #endif
