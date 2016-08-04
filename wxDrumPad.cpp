@@ -81,9 +81,15 @@ void wxDrumPad::SetText( wxString& text )
 void wxDrumPad::OnPaint(wxPaintEvent&)
 {
     wxPaintDC dc(this);
-    dc.DrawBitmap( *_bitmap, 0, 0, true );
-    dc.DrawBitmap( *_arrowBitmap, ((_width * 3) / 4), ((_height) / 4), true);
-    dc.DrawText(_text, 8, 8);
+    if( _bitmap->IsOk() )
+    {
+        dc.DrawBitmap( *_bitmap, 0, 0, true );
+    }
+    if( _arrowBitmap->IsOk() )
+    {
+        dc.DrawBitmap( *_arrowBitmap, ((_width * 3) / 4), 0, true);
+    }
+    dc.DrawText(_text, 14, 12);
     // TODO: Draw something special on each key if a specific note is playing.
 }
 

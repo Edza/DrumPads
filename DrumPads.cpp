@@ -51,12 +51,10 @@ END_EVENT_TABLE()
 
 DrumPads::DrumPads()
 {
-    memset(_pads, 0, (sizeof(wxDrumPad) * MAX_PADS));
 }
 
 DrumPads::DrumPads(wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
 {
-    memset(_pads, 0, (sizeof(wxDrumPad) * MAX_PADS));
     Create(parent, id, caption, pos, size, style);
 }
 
@@ -91,13 +89,13 @@ bool DrumPads::Create( wxWindow* parent, wxWindowID id, const wxString& caption,
         SetIcon(_icon);
     }
     InitializeAudio();
-    
+
     return true;
 }
  
 bool DrumPads::CreateControls()
 {
-    wxGridSizer* sizer = new wxGridSizer(NUM_PADS_WIDE, NUM_PADS_HIGH, 0, 0);
+    wxGridSizer* sizer = new wxGridSizer(NUM_PADS_HIGH, NUM_PADS_WIDE, 0, 0);
     this->SetSizer(sizer);
 
     // Load images.
@@ -108,10 +106,21 @@ bool DrumPads::CreateControls()
         _padImage = new wxBitmap(wxString(_(".\\button256blue.png")));
         _arrowImage = new wxBitmap(wxString(_(".\\arrowblue.png")));
 #endif
-
-    if( _padImage == NULL )
+    if( _padImage->IsOk() )
     {
-        printf("Failed to open button256witharrowblue.png\n");
+        printf("Loaded button256blue.png\n");
+    }
+    else
+    {
+        printf("Failed to open button256blue.png\n");
+    }
+    if( _arrowImage->IsOk() )
+    {
+        printf("Loaded arrowblue.png\n");
+    }
+    else
+    {
+        printf("Failed to open arrowblue.png\n");
     }
 
     // Create pads.
@@ -121,7 +130,7 @@ bool DrumPads::CreateControls()
         _pads[i] = new wxDrumPad(this, title, _padImage, _arrowImage, 36+i, this, 500+i, wxPoint(0,0), wxSize(256,256));
         sizer->Add(_pads[i], 0, i % NUM_PADS_WIDE, i / NUM_PADS_WIDE);
     }
-    
+
     GetSizer()->Fit(this);
     GetSizer()->SetSizeHints(this);
 }
@@ -148,17 +157,19 @@ bool DrumPads::InitializeAudio()
         fprintf(stderr, "Unable to allocate mixing channels: %s\n", SDL_GetError());
         exit(-1);
     }
-    
+
     // Build wave file list.
     wxDir dir;
     wxString filename;
     int numFound = 0;
-    if( dir.Open(wxString(_("./samples"))) )
+    wxDir::GetAllFiles(wxString(_("./samples")), &_waveFileNames, wxString(_("*.wav")), wxDIR_FILES);
+    numFound = _waveFileNames.GetCount();
+    /*if( dir.Open(wxString(_("./samples"))) )
     {
         bool cont = dir.GetFirst(&filename, wxString(_("*.wav")), wxDIR_FILES);
         while(true)
         {
-            wprintf(_("Found %s\n"), filename.c_str());
+            wprintf(_("Found %s\n"), filename.mb_str().data());
             _waveFileNames.Add(filename);
             ++numFound;
             cont = dir.GetNext(&filename);
@@ -167,14 +178,14 @@ bool DrumPads::InitializeAudio()
                 break;
             }
         }
-    }
+    }*/
     printf("Found %d samples.\n", numFound);
-    
+
 #ifdef DEMO
-        _sampleSetting[0] = 2;
-        _sampleSetting[1] = 14;
-        _sampleSetting[2] = 22;
-        _sampleSetting[3] = 26;
+    _sampleSetting[0] = 2;
+    _sampleSetting[1] = 14;
+    _sampleSetting[2] = 22;
+    _sampleSetting[3] = 26;
 #else
     for( int j = 0; j < NUM_PADS; j++ )
     {
@@ -183,15 +194,15 @@ bool DrumPads::InitializeAudio()
 #endif
 
     // Load waveforms - only the ones assigned to pads. If we change waveforms, unload and reload in that code.
-    for( int i = 0; i < NUM_WAVEFORMS; i++ )
+    for( int i = 0; i < NUM_PADS; i++ )
     {
         _sample[i] = Mix_LoadWAV(_waveFileNames[_sampleSetting[i]].mb_str().data());
         if( _sample[i] == NULL )
         {
-            wprintf(_("Unable to load wave file: %s\n"), _waveFileNames[_sampleSetting[i]].c_str());
+            wprintf(_("Unable to load wave file: %s\n"), _waveFileNames[_sampleSetting[i]].mb_str().data());
         }
     }
-    
+
     return true;
 }
 
@@ -207,7 +218,7 @@ void DrumPads::OnCloseWindow( wxCloseEvent& event )
 // Process keyboard key and get the pad number it triggers. Don't play the sample, just return the pad id.
 int DrumPads::GetPadNumber(int key)
 {
-    switch (key) 
+    switch (key)
     {
         case 'q':
         case 't':
@@ -260,7 +271,7 @@ int DrumPads::GetPadNumber(int key)
             break;
 #endif
         default:
-            break;    
+            break;
     }
     return -1;
 }
@@ -283,7 +294,7 @@ void DrumPads::OnKeyDown( wxKeyEvent& event )
         return;
     }
     // Always retrigger.
-    Mix_PlayChannel(-1, _sample[padnumber], 0);    
+    Mix_PlayChannel(-1, _sample[padnumber], 0);
     // TODO: Send the MIDI note if necessary.
     //PlayNote( note );
     event.Skip(true);

@@ -27,11 +27,11 @@
 /*!
  * Control identifiers
  */
-#define ID_DRUMPADS_DLG 10000
+#define ID_DRUMPADS_DLG 10001
 #define SYMBOL_DRUMPADS_STYLE wxCAPTION|wxSYSTEM_MENU|wxCLOSE_BOX|wxWANTS_CHARS|wxMINIMIZE_BOX
 #define SYMBOL_DRUMPADS_TITLE _("DrumPads")
 #define SYMBOL_DRUMPADS_IDNAME ID_DRUMPADS_DLG
-#define SYMBOL_DRUMPADS_SIZE wxSize(400, 300)
+#define SYMBOL_DRUMPADS_SIZE wxSize(1024, 768)
 #define SYMBOL_DRUMPADS_POSITION wxDefaultPosition
 #define ID_BANKSPIN 10001
 #define ID_PATCHSPIN 10003
@@ -140,13 +140,13 @@ public:
     //void ProcessMidiMessage(unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4);
 	bool _done;
 private:
-    wxDrumPad* _pads[MAX_PADS];  
+    wxDrumPad* _pads[MAX_PADS];
     Mix_Chunk* _sample[NUM_PADS];
     unsigned int _sampleSetting[NUM_PADS];
     wxArrayString _waveFileNames;
     wxBitmap* _padImage;
     wxBitmap* _arrowImage;
-    
+
     wxIcon _icon;
     int _sampleRate;
     int _sampleBlockSize;

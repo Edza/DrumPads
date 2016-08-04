@@ -16,10 +16,7 @@ DrumPadsApp::DrumPadsApp()
 
 bool DrumPadsApp::OnInit()
 {
-    wxImage::AddHandler(new wxXPMHandler);
-    wxImage::AddHandler(new wxPNGHandler);
-    wxImage::AddHandler(new wxJPEGHandler);
-    wxImage::AddHandler(new wxGIFHandler);
+    wxInitAllImageHandlers();
 
     _mainWindow = new DrumPads(NULL, ID_DRUMPADS_DLG );
     _mainWindow->Show(true);
