@@ -1,9 +1,6 @@
 #include <stdio.h>
 
-//#include "SDL/include/SDL.h"
-//#undef main
 #ifndef WIN32
-// Requires libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev
 #include <unistd.h>
 #include <syslog.h>
 #include <string.h>
@@ -133,6 +130,8 @@ bool DrumPads::CreateControls()
 
     GetSizer()->Fit(this);
     GetSizer()->SetSizeHints(this);
+
+	return true;
 }
 
 bool DrumPads::InitializeAudio()
