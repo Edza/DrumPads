@@ -5,6 +5,7 @@ BEGIN_EVENT_TABLE(wxDrumPad,wxControl)
     EVT_LEFT_UP(wxDrumPad::OnRelease)
     EVT_PAINT(wxDrumPad::OnPaint)
     EVT_RIGHT_DOWN(wxDrumPad::OnRightClick)
+    EVT_KEY_DOWN( wxDrumPad::OnKeyDown )
 END_EVENT_TABLE()
 
 wxDrumPad::wxDrumPad( wxWindow* parent, wxString& text, wxBitmap* bitmap, wxBitmap* arrowBitmap, int baseNote, DrumCallback* callback, wxWindowID id, 
@@ -26,6 +27,7 @@ wxDrumPad::wxDrumPad() : wxControl()
 
 void wxDrumPad::OnClick( wxMouseEvent& event )
 {
+	//wxMessageBox(wxString(_("Note on")));
     wxPoint location = event.GetPosition();
     // Determine whether we've clicked on the arrow and whether it matters.
     if( location.x < ((_width * 3) / 4) || location.y > ((_height * 1) / 4))
@@ -89,7 +91,11 @@ void wxDrumPad::OnPaint(wxPaintEvent&)
     {
         dc.DrawBitmap( *_arrowBitmap, ((_width * 3) / 4), 0, true);
     }
-    dc.DrawText(_text, 14, 12);
+	wxFont currFont = this->GetFont();
+	currFont.MakeBold();
+	dc.SetFont(currFont);
+	dc.SetTextForeground(*wxWHITE);
+    dc.DrawText(_text, 20, 16);
     // TODO: Draw something special on each key if a specific note is playing.
 }
 
@@ -102,7 +108,7 @@ void wxDrumPad::NoteOn()
 
 void wxDrumPad::NoteOff()
 {
-    //_parent->StopNote( _midiNote + note );
+    _parent->StopNote(_midiNote);
     //NoteIndicatorOff( note );
 }
 
@@ -114,4 +120,10 @@ void wxDrumPad::OnRightClick( wxMouseEvent& event )
 wxSize wxDrumPad::DoGetBestSize () const
 {
     return wxSize(_width, _height);
+}
+
+void wxDrumPad::OnKeyDown( wxKeyEvent& event )
+{
+	//wxMessageBox("Key event");
+	this->_parent->OnKeyDown(event);
 }

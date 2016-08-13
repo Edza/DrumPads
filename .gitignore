@@ -34,3 +34,5 @@
 *.pdb
 *.lastbuildstate
 *.res
+*.opensdf
+*.sdf

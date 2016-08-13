@@ -38,7 +38,7 @@ public:
     void OnRightClick( wxMouseEvent& event );
     void EnableArrow( bool enabled );
     void SetText( wxString& text );
-
+    void OnKeyDown( wxKeyEvent& event );	
 };
 
 #endif

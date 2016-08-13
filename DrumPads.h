@@ -19,6 +19,7 @@
 //#endif
 #include "DrumCallback.h"
 #include "wxDrumPad.h"
+#include "../wxAudioControls/MidiSettingsInterface.h"
 
 #define INITGUID
 
@@ -82,6 +83,7 @@
 #define ID_TXT_SUSTAIN 10053
 #define ID_TXT_RELEASE 10054
 #define ID_BUTTON_SETTINGS 10055
+#define ID_LOCKBUTTON 10056
 
 /*!
  * Compatibility
@@ -115,7 +117,7 @@
 #endif
 
 //class DrumPads: public wxDialog, public DrumCallback, public MidiSettingsInterface, public AudioSettingsInterface
-class DrumPads: public wxDialog, public DrumCallback
+class DrumPads: public wxDialog, public DrumCallback, public MidiSettingsInterface
 {
     DECLARE_DYNAMIC_CLASS( DrumPads )
     DECLARE_EVENT_TABLE()
@@ -125,6 +127,7 @@ public:
     bool Create( wxWindow* parent, wxWindowID id = SYMBOL_DRUMPADS_IDNAME, const wxString& caption = SYMBOL_DRUMPADS_TITLE, const wxPoint& pos = SYMBOL_DRUMPADS_POSITION, const wxSize& size = SYMBOL_DRUMPADS_SIZE, long style = SYMBOL_DRUMPADS_STYLE );
     bool CreateControls();
     bool InitializeAudio();
+	bool InitializeMidi();
     void OnCloseWindow( wxCloseEvent& event );
     void OnKeyDown( wxKeyEvent& event );
     void OnKeyUp( wxKeyEvent& event );
@@ -134,12 +137,27 @@ public:
     //void SendMidiMessage( unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4, bool shortmsg = false );
     // DrumCallback members.
     void PlayNote( int note, bool receivedFromMidi = false );
+    void StopNote( int note, bool receivedFromMidi = false );
     int GetPadNumber(int key);
     void ArrowClicked( int note );
     //void StopNote( int note, bool receivedFromMidi = false );
     //void AllNotesOff( bool receivedFromMidi = false );
     //void ProcessMidiMessage(unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4);
 	bool _done;
+	// MidiSettingsInterface methods.
+	void SelectMidiInputDevice(int number);
+	void SelectMidiOutputDevice(int number);
+	void SelectMidiInputChannel(int number);
+	void SelectMidiOutputChannel(int number);
+	void EnableMidiOutput(bool enabled);
+	// End MidiSettingsInterface methods.
+	void OnSave( wxCommandEvent& event );
+	void OnLoad( wxCommandEvent& event );
+	void OnLock( wxCommandEvent& event );
+	void OnMidiSettings( wxCommandEvent& event );
+	void AllNotesOff( bool receivedFromMidi = false );
+    void SendMidiMessage( unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4, bool shortmsg = false );
+    void ProcessMidiMessage(unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4);
 private:
     wxDrumPad* _pads[MAX_PADS];
     Mix_Chunk* _sample[NUM_PADS];
@@ -147,10 +165,26 @@ private:
     wxArrayString _waveFileNames;
     wxBitmap* _padImage;
     wxBitmap* _arrowImage;
+	wxButton* _loadButton;
+	wxButton* _saveButton;
+	wxButton* _midiButton;
+	wxButton* _lockButton;
 
     wxIcon _icon;
     int _sampleRate;
     int _sampleBlockSize;
+    wxColour _textColour;
+    wxColour _backgroundColour;
+	// MIDI Settings
+    int _inputChannel;
+	int _outputChannel;
+	int _midiInputDeviceNumber;
+	int _midiOutputDeviceNumber;
+	bool _midiOutputEnabled;
+	// End MIDI Settings
 };
+
+// Callback for handling incoming MIDI messages.
+void MidiMessageHandler( double deltatime, std::vector< unsigned char > *message, void *userData );
 
 #endif
