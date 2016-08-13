@@ -169,7 +169,7 @@ private:
 	wxButton* _saveButton;
 	wxButton* _midiButton;
 	wxButton* _lockButton;
-
+	bool _locked;
     wxIcon _icon;
     int _sampleRate;
     int _sampleBlockSize;

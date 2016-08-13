@@ -150,6 +150,7 @@ bool DrumPads::Create( wxWindow* parent, wxWindowID id, const wxString& caption,
  
 bool DrumPads::CreateControls()
 {
+	_locked = false;
 	_textColour = *wxWHITE;
 	_backgroundColour.Set(0, 41, 102);
 
@@ -411,6 +412,19 @@ void DrumPads::OnLoad( wxCommandEvent& )
 
 void DrumPads::OnLock( wxCommandEvent& )
 {
+	_locked = !_locked;
+	for( int i = 0; i < NUM_PADS; i++ )
+	{
+		_pads[i]->SetLock(_locked);
+	}
+	if( _locked )
+	{
+		_lockButton->SetLabel(wxString(_("Unlock")));
+	}
+	else
+	{
+		_lockButton->SetLabel(wxString(_("Lock")));
+	}
 }
 
 /**

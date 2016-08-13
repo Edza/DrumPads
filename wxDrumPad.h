@@ -19,7 +19,6 @@ private:
     int _midiNote; // Parent's job to translate MIDI note into pad number or whatever.
     bool _triggered; // Optional. In case we want to indicate it was triggered.
     DrumCallback* _parent;
-
     void OnPaint( wxPaintEvent &event );
     void NoteOn( );
     void NoteOff( );
@@ -36,9 +35,9 @@ public:
     void OnClick( wxMouseEvent &event );
     void OnRelease( wxMouseEvent &event );
     void OnRightClick( wxMouseEvent& event );
-    void EnableArrow( bool enabled );
     void SetText( wxString& text );
     void OnKeyDown( wxKeyEvent& event );	
+	void SetLock(bool locked);
 };
 
 #endif

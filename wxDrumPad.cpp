@@ -87,7 +87,7 @@ void wxDrumPad::OnPaint(wxPaintEvent&)
     {
         dc.DrawBitmap( *_bitmap, 0, 0, true );
     }
-    if( _arrowBitmap->IsOk() )
+    if( _arrowEnabled && _arrowBitmap->IsOk() )
     {
         dc.DrawBitmap( *_arrowBitmap, ((_width * 3) / 4), 0, true);
     }
@@ -126,4 +126,10 @@ void wxDrumPad::OnKeyDown( wxKeyEvent& event )
 {
 	//wxMessageBox("Key event");
 	this->_parent->OnKeyDown(event);
+}
+
+void wxDrumPad::SetLock(bool locked)
+{
+	_arrowEnabled = !locked;
+	Refresh();
 }
