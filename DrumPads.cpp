@@ -10,6 +10,7 @@
 #include <math.h>
 #include "DrumPads.h"
 #include "../wxAudioControls/wxMidiSettingsDlg.h"
+#include "../wxAudioControls/wxSettingsFile.h"
 #include "wx/dir.h"
 #include "wx/filename.h"
 
@@ -227,7 +228,7 @@ bool DrumPads::InitializeAudio()
         exit(-1);
     }
 
-    result = Mix_AllocateChannels(4);
+    result = Mix_AllocateChannels(6);
     if( result < 0 )
     {
         fprintf(stderr, "Unable to allocate mixing channels: %s\n", SDL_GetError());
@@ -247,6 +248,15 @@ bool DrumPads::InitializeAudio()
 	}
 	else
 	{
+		// Fix paths so they're absolute -- they load as relative.
+		for( int i = 0; i < _waveFileNames.Count(); i++ )
+		{
+			wxFileName fname = wxFileName(_waveFileNames[i]);
+			fname.Normalize();
+			// Verified working.
+			//wxMessageBox(fname.GetFullPath(), _waveFileNames[i]);
+			_waveFileNames[i] = fname.GetFullPath();
+		}
 #ifdef DEMO
 		_sampleSetting[0] = 2;
 		_sampleSetting[1] = 14;
@@ -402,12 +412,70 @@ void DrumPads::OnMouseRelease( wxMouseEvent& event )
     event.Skip();
 }
 
-void DrumPads::OnSave( wxCommandEvent& )
+void DrumPads::OnSave( wxCommandEvent& event )
 {
+	//wxString path = wxStandardPaths::Get().GetUserConfigDir() + _("\\..\\Local\\Sigmatizm");
+	wxFileDialog fdialog( this, _("Save Config As"), _("."), _(""), _("DrumPads Kits (*.drumpads) |*.drumpads||"), wxFD_SAVE );
+
+	wxString filename;
+	
+	if( fdialog.ShowModal() != wxID_OK )
+	{
+		return;
+	}
+
+	wxSettingsFile file;
+	for( int i = 0; i < NUM_PADS; i++ )
+	{
+		//wxString fname = wxFileName(_waveFileNames[_sampleSetting[i]]).GetFullPath();
+		wxFileName fname = wxFileName(_waveFileNames[_sampleSetting[i]]);
+		fname.Normalize();
+		wxMessageBox(fname.GetFullPath());
+		file.SetValue(wxString::Format(_("Pad%d"), i), fname.GetFullPath() );
+	}
+	wxString name = fdialog.GetPath();
+	file.Save(name);
+	event.Skip(false);
 }
 
 void DrumPads::OnLoad( wxCommandEvent& )
 {
+	wxFileDialog fdialog( this, _("Load A Config"), _("."), _(""), _("DrumPads Kits (*.drumpads) |*.drumpads||"), wxFD_OPEN );
+
+	wxString filename;
+
+	if( fdialog.ShowModal() != wxID_OK )
+	{
+		return;
+	}
+
+	wxString value;
+	wxSettingsFile file;
+	wxString fname = fdialog.GetPath();
+	file.Load(fname);
+	for( int i = 0; i < NUM_PADS; i++ )
+	{
+		bool found = false;
+		value = file.GetValue(wxString::Format(_("Pad%d"), i));
+		for( int j = 0; j < _waveFileNames.Count(); j++ )
+		{
+			if( _waveFileNames[j] == value )
+			{
+				_sampleSetting[i] = j;
+				// DELETE EXISTING SAMPLE, LOAD NEW
+				// TODO: Handle "not found" samples.
+				 Mix_FreeChunk(_sample[i]);
+				_sample[i] = Mix_LoadWAV(_waveFileNames[_sampleSetting[i]].mb_str().data());
+				wxString title = wxFileName(_waveFileNames[_sampleSetting[i]]).GetName();
+				_pads[i]->SetText(title);
+				found = true;
+			}
+		}
+		if( !found )
+		{
+			wxMessageBox(value, _("Sample not found"));
+		}
+	}
 }
 
 void DrumPads::OnLock( wxCommandEvent& )
