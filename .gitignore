@@ -23,7 +23,7 @@
 *.lib
 
 # Executables
-*.exe
+DrumPads.exe
 *.out
 *.app
 
