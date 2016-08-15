@@ -81,7 +81,7 @@ void DrumPads::PlayNote( int note, bool receivedFromMidi )
 {
 	// TODO: Send outgoing MIDI.
 	int realNote = note - MIDI_OFFSET;
-	if( realNote < 0 || realNote > NUM_PADS )
+	if( realNote < 0 || realNote >= NUM_PADS )
 	{
 		// Invalid note.
 		//wxMessageBox("Invalid note.");
@@ -228,7 +228,7 @@ bool DrumPads::InitializeAudio()
         exit(-1);
     }
 
-    result = Mix_AllocateChannels(6);
+    result = Mix_AllocateChannels(8);
     if( result < 0 )
     {
         fprintf(stderr, "Unable to allocate mixing channels: %s\n", SDL_GetError());
@@ -379,8 +379,14 @@ void DrumPads::OnKeyDown( wxKeyEvent& event )
     }
     // Always retrigger.
 	PlayNote(padnumber + MIDI_OFFSET, false);
-    // TODO: Send the MIDI note if necessary.
-    //PlayNote( note );
+
+	// Send the MIDI note if necessary.
+	if( _midiOutputEnabled )
+	{
+		// 00 (not used), 7F (velocity), 2B (note number), 9X (note on)+channel
+		SendMidiMessage( 0, 127, padnumber + MIDI_OFFSET, (143 + _outputChannel) );
+		SendMidiMessage( 0, 127, padnumber + MIDI_OFFSET, (159 + _outputChannel) );
+	}
     event.Skip(true);
 }
 
@@ -514,6 +520,8 @@ void DrumPads::OnMidiSettings( wxCommandEvent& )
 
 bool DrumPads::InitializeMidi()
 {
+	_inputChannel = 1;
+	_outputChannel = 1;
     _midiInDevice = new RtMidiIn();
 	_midiOutDevice = new RtMidiOut();
 	EnableMidiOutput(false);
