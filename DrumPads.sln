@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DrumPads", "DrumPads.vcxproj", "{684B6EE8-035F-40AF-84F3-B102134381BD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8A0DF122-86C7-4FEB-901E-CEEF329ADF9D} = {8A0DF122-86C7-4FEB-901E-CEEF329ADF9D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxAudioControls", "..\wxAudioControls\wxAudioControls.vcxproj", "{8A0DF122-86C7-4FEB-901E-CEEF329ADF9D}"
 EndProject

@@ -36,3 +36,8 @@ DrumPads.exe
 *.res
 *.opensdf
 *.sdf
+*.suo
+*.filters
+*.user
+*.db
+*.cache

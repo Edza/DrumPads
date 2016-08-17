@@ -656,10 +656,8 @@ void DrumPads::SelectMidiOutputDevice(int number)
         _midiOutDevice->closePort();
         _midiOutDevice->openPort(number);
     }
-    //catch( RtMidiError &error )
     catch( RtMidiError &error )
     {
-        //wxMessageBox(wxString::FromAscii(error.what()));
         wxMessageBox(wxString::FromAscii(error.what()));
     }
 #endif
@@ -743,27 +741,26 @@ void MidiMessageHandler( double deltatime, std::vector< unsigned char > *message
     unsigned char b = 0;
     unsigned char c = 0;
     unsigned char d = 0;
-    if( message->size() == 4 )
+    if( message->size() > 0 )
+    {
+        d = (*message)[0];
+    }
+    if( message->size() > 1 )
+    {
+        c = (*message)[1];
+    }
+    if( message->size() > 2 )
+    {
+        b = (*message)[2];
+    }
+    if( message->size() > 3 )
     {
         a = (*message)[3];
-        b = (*message)[2];
-        c = (*message)[1];
-        d = (*message)[0];
     }
-    else if( message->size() == 3 )
-    {
-        b = (*message)[2];
-        c = (*message)[1];
-        d = (*message)[0];
-    }
-    else if( message->size() == 2 )
-    {
-        c = (*message)[1];
-        d = (*message)[0];
-    }
-    else if( message->size() == 1 )
-    {
-        d = (*message)[0];
-    }
+	if( message->size() > 4 )
+	{
+		printf( "MIDI message size too large, cannot process." );
+		return;
+	}
 	drumpads->ProcessMidiMessage(a, b, c, d);
 }

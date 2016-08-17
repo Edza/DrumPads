@@ -63,7 +63,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>F:\lib\rtmidi-2.1.0;F:\lib\SDL2_mixer-2.0.0\include;F:\lib\SDL_2-2.0.3\include;F:\lib\wxWidgets-3.0.2\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath)‌;$(FrameworkSDKDir)\include;C:\Users\xangis\Desktop\SDL-2.0.3\include</IncludePath>
-    <LibraryPath>F:\lib\rtmidi-2.1.0\lib;C:\Users\Xangis\code\wxAudioControls\Release;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x86\;F:\lib\SDL2_mixer-2.0.0\lib\x86;F:\lib\SDL_2-2.0.3\lib\x86;F:\lib\wxWidgets-3.0.2\lib\vc_lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <LibraryPath>C:\Users\Xangis\code\wxAudioControls\Release;F:\lib\rtmidi-2.1.0\lib;C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x86\;F:\lib\SDL2_mixer-2.0.0\lib\x86;F:\lib\SDL_2-2.0.3\lib\x86;F:\lib\wxWidgets-3.0.2\lib\vc_lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Demo Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
