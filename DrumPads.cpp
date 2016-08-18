@@ -128,7 +128,8 @@ void DrumPads::ArrowClicked( int note )
 	// TODO: Advance to the next sample, set the filename and number, load the file, and replace the current _sample data with the new one.
 	 _sampleSetting[note] = (_sampleSetting[note] + 1) % _waveFileNames.Count();
 	 Mix_FreeChunk(_sample[note]);
-	_sample[note] = Mix_LoadWAV(_waveFileNames[_sampleSetting[note]].mb_str().data());
+	wxString fileName = wxString::Format(_("samples\\%s"), _waveFileNames[_sampleSetting[note]]);
+	_sample[note] = Mix_LoadWAV(fileName.mb_str().data());
 	wxString title = wxFileName(_waveFileNames[_sampleSetting[note]]).GetName();
 	_pads[note]->SetText(title);
 }
@@ -161,16 +162,16 @@ bool DrumPads::CreateControls()
 	wxBoxSizer* buttonsizer = new wxBoxSizer(wxHORIZONTAL);
 	vertsizer->Add(buttonsizer);
 
-	_loadButton = new wxButton(this, ID_LOADBUTTON, "Load");
+	_loadButton = new wxButton(this, ID_LOADBUTTON, "Load Kit");
 	buttonsizer->Add(_loadButton);
 
-	_saveButton = new wxButton(this, ID_SAVEBUTTON, "Save");
+	_saveButton = new wxButton(this, ID_SAVEBUTTON, "Save Kit");
 	buttonsizer->Add(_saveButton);
 
-	_midiButton = new wxButton(this, ID_MIDIBUTTON, "MIDI");
+	_midiButton = new wxButton(this, ID_MIDIBUTTON, "MIDI Settings");
 	buttonsizer->Add(_midiButton);
 
-	_lockButton = new wxButton(this, ID_LOCKBUTTON, "Lock");
+	_lockButton = new wxButton(this, ID_LOCKBUTTON, "Lock Pads");
 	buttonsizer->Add(_lockButton);
 
     wxGridSizer* sizer = new wxGridSizer(NUM_PADS_HIGH, NUM_PADS_WIDE, 0, 0);
@@ -239,7 +240,7 @@ bool DrumPads::InitializeAudio()
     wxDir dir;
     wxString filename;
     int numFound = 0;
-    wxDir::GetAllFiles(wxString(_("./samples")), &_waveFileNames, wxString(_("*.wav")), wxDIR_FILES);
+    wxDir::GetAllFiles(wxString(_(".\\samples")), &_waveFileNames, wxString(_("*.wav")), wxDIR_FILES);
     numFound = _waveFileNames.GetCount();
     printf("Found %d samples.\n", numFound);
 	if( numFound < 1 )
@@ -255,7 +256,7 @@ bool DrumPads::InitializeAudio()
 			fname.Normalize();
 			// Verified working.
 			//wxMessageBox(fname.GetFullPath(), _waveFileNames[i]);
-			_waveFileNames[i] = fname.GetFullPath();
+			_waveFileNames[i] = fname.GetFullName();
 		}
 #ifdef DEMO
 		_sampleSetting[0] = 2;
@@ -272,7 +273,8 @@ bool DrumPads::InitializeAudio()
 		// Load waveforms - only the ones assigned to pads. If we change waveforms, unload and reload in that code.
 		for( int i = 0; i < NUM_PADS; i++ )
 		{
-			_sample[i] = Mix_LoadWAV(_waveFileNames[_sampleSetting[i]].mb_str().data());
+			wxString fileName = wxString::Format(_("samples\\%s"), _waveFileNames[_sampleSetting[i]]);
+			_sample[i] = Mix_LoadWAV(fileName.mb_str().data());
 			if( _sample[i] == NULL )
 			{
 				wprintf(_("Unable to load wave file: %s\n"), _waveFileNames[_sampleSetting[i]].mb_str().data());
@@ -436,8 +438,8 @@ void DrumPads::OnSave( wxCommandEvent& event )
 		//wxString fname = wxFileName(_waveFileNames[_sampleSetting[i]]).GetFullPath();
 		wxFileName fname = wxFileName(_waveFileNames[_sampleSetting[i]]);
 		fname.Normalize();
-		wxMessageBox(fname.GetFullPath());
-		file.SetValue(wxString::Format(_("Pad%d"), i), fname.GetFullPath() );
+		//wxMessageBox(fname.GetFullName());
+		file.SetValue(wxString::Format(_("Pad%d"), i), fname.GetFullName() );
 	}
 	wxString name = fdialog.GetPath();
 	file.Save(name);
@@ -471,7 +473,8 @@ void DrumPads::OnLoad( wxCommandEvent& )
 				// DELETE EXISTING SAMPLE, LOAD NEW
 				// TODO: Handle "not found" samples.
 				 Mix_FreeChunk(_sample[i]);
-				_sample[i] = Mix_LoadWAV(_waveFileNames[_sampleSetting[i]].mb_str().data());
+				wxString fileName = wxString::Format(_("samples\\%s"), _waveFileNames[_sampleSetting[i]]);
+				_sample[i] = Mix_LoadWAV(fileName.mb_str().data());
 				wxString title = wxFileName(_waveFileNames[_sampleSetting[i]]).GetName();
 				_pads[i]->SetText(title);
 				found = true;
