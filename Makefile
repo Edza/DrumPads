@@ -17,7 +17,7 @@ LIBDIR = /usr/lib
 
 # Object files
 #OBJECTS = wxDrumPad.o DrumPads.o DrumPadsApp.o $(INCLUDEDIR3)/RtMidi.o
-OBJECTS = wxDrumPad.o DrumPads.o DrumPadsApp.o
+OBJECTS = wxDrumPad.o DrumPads.o DrumPadsApp.o ../wxAudioControls/wxSettingsFile.o ../wxAudioControls/wxMidiSettingsDlg.o ../wxAudioControls/wxSwitch.o ../wxAudioControls/wxBitmapSpinButton.o ../wxAudioControls/wxKeylessChoice.o
 
 #CXX = $(shell $(WX_CONFIG) --cxx -ggdb)
 CXX = $(shell $(WX_CONFIG) --cxx -O3)
@@ -31,7 +31,7 @@ CXX = $(shell $(WX_CONFIG) --cxx -O3)
 all:    $(PROGRAM)
 
 $(PROGRAM):	$(OBJECTS)
-	$(CXX) -o $(PROGRAM) $(OBJECTS) -L$(LIBDIR) `$(WX_CONFIG) --libs` -lportaudio -lasound -lpthread -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
+	$(CXX) -o $(PROGRAM) $(OBJECTS) -L$(LIBDIR) `$(WX_CONFIG) --libs` -lportaudio -lasound -lpthread -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lrtmidi
 
 clean: 
 	rm -f *.o $(PROGRAM) $(INCLUDEDIR3)/*.o
