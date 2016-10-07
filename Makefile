@@ -1,7 +1,7 @@
 # Sigmatizm makefile.  Requires wxWidgets.
 # by default, wx-config from the PATH is used
 # If this fails, install apt package libwxgtk3.0-dev
-WX_CONFIG := /usr/bin/wx-config
+WX_CONFIG := wx-config
 
 # Main executable file
 PROGRAM = DrumPads
