@@ -10,9 +10,9 @@ PROGRAM = DrumPads
 INCLUDEDIR2 = /usr/include
 # To switch to rtmidi 2.1, we need to change the error handling in wxkeyboard.cpp and also find a way to get MIDI devices
 # to work, because they don't in 2.1 for some reason. Something to do with the dummy device, according to an error.
-#INCLUDEDIR = /usr/include/SDL2
-INCLUDEDIR3 = rtmidi-2.1.0
-#INCLUDEDIR3 = rtmidi-1.0.11
+INCLUDEDIR = ../../lib/SDL_2-2.0.3/include
+INCLUDEDIR3 = ../../lib/rtmidi-2.1.0
+INCLUDEDIR4 = ../../lib/SDL2_mixer-2.0.0/include
 LIBDIR = /usr/lib
 
 # Object files
@@ -25,8 +25,8 @@ CXX = $(shell $(WX_CONFIG) --cxx -O3)
 .SUFFIXES:	.o .cpp
 
 .cpp.o :
-#	$(CXX) -c -O3 -D__LINUX_ALSASEQ__ -I$(INCLUDEDIR2) -I$(INCLUDEDIR3) `$(WX_CONFIG) --cxxflags` -o $@ $<
-	$(CXX) -c -g -ggdb -D__LINUX_ALSASEQ__ -I$(INCLUDEDIR2) -I$(INCLUDEDIR3) `$(WX_CONFIG) --cxxflags` -o $@ $<
+#	$(CXX) -c -O3 -D__LINUX_ALSASEQ__ -I$(INCLUDEDIR) -I$(INCLUDEDIR2) -I$(INCLUDEDIR3) -I$(INCLUDEDIR4) `$(WX_CONFIG) --cxxflags` -o $@ $<
+	$(CXX) -c -g -ggdb -D__LINUX_ALSASEQ__ -I$(INCLUDEDIR) -I$(INCLUDEDIR2) -I$(INCLUDEDIR3) -I$(INCLUDEDIR4) `$(WX_CONFIG) --cxxflags` -o $@ $<
 
 all:    $(PROGRAM)
 
