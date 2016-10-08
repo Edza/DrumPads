@@ -30,7 +30,7 @@
  */
 #define ID_DRUMPADS_DLG 10001
 #define SYMBOL_DRUMPADS_STYLE wxCAPTION|wxSYSTEM_MENU|wxCLOSE_BOX|wxWANTS_CHARS|wxMINIMIZE_BOX
-#define SYMBOL_DRUMPADS_TITLE _("DrumPads by Zeta Centauri")
+#define SYMBOL_DRUMPADS_TITLE _("DrumPads 2 by Zeta Centauri")
 #define SYMBOL_DRUMPADS_IDNAME ID_DRUMPADS_DLG
 #define SYMBOL_DRUMPADS_SIZE wxSize(1024, 768)
 #define SYMBOL_DRUMPADS_POSITION wxDefaultPosition
@@ -139,7 +139,7 @@ public:
     void PlayNote( int note, bool receivedFromMidi = false );
     void StopNote( int note, bool receivedFromMidi = false );
     int GetPadNumber(int key);
-    void ArrowClicked( int note );
+    void ArrowClicked( int note, bool back = false );
     //void StopNote( int note, bool receivedFromMidi = false );
     //void AllNotesOff( bool receivedFromMidi = false );
     //void ProcessMidiMessage(unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4);
@@ -164,7 +164,8 @@ private:
     unsigned int _sampleSetting[NUM_PADS];
     wxArrayString _waveFileNames;
     wxBitmap* _padImage;
-    wxBitmap* _arrowImage;
+    wxBitmap* _leftArrowImage;
+    wxBitmap* _rightArrowImage;
 	wxButton* _loadButton;
 	wxButton* _saveButton;
 	wxButton* _midiButton;

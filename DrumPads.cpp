@@ -116,7 +116,7 @@ void DrumPads::StopNote( int note, bool receivedFromMidi )
 	}
 }
 
-void DrumPads::ArrowClicked( int note )
+void DrumPads::ArrowClicked( int note, bool back )
 {
 	note = note - MIDI_OFFSET;
 	if( note < 0 || note > NUM_PADS )
@@ -125,8 +125,19 @@ void DrumPads::ArrowClicked( int note )
 		//wxMessageBox("Invalid note.");
 		return;
 	}
-	// TODO: Advance to the next sample, set the filename and number, load the file, and replace the current _sample data with the new one.
-	 _sampleSetting[note] = (_sampleSetting[note] + 1) % _waveFileNames.Count();
+	// Advance or decrement to the next sample, set the filename and number, load the file, and replace the current _sample data with the new one.
+	if( back )
+	{
+		 _sampleSetting[note] = (_sampleSetting[note] - 1);
+		 if( _sampleSetting[note] < 0 )
+		 {
+			 _sampleSetting[note] = _waveFileNames.Count() - 1;
+		 }
+	}
+	else
+	{
+		 _sampleSetting[note] = (_sampleSetting[note] + 1) % _waveFileNames.Count();
+	}
 	 Mix_FreeChunk(_sample[note]);
 	wxString fileName = wxString::Format(_("samples\\%s"), _waveFileNames[_sampleSetting[note]]);
 	_sample[note] = Mix_LoadWAV(fileName.mb_str().data());
@@ -180,30 +191,28 @@ bool DrumPads::CreateControls()
     // Load images.
 	_padImage = new wxBitmap();
 	_padImage->LoadFile(_("button256blue.png"), wxBITMAP_TYPE_PNG);
-	_arrowImage = new wxBitmap();
-    _arrowImage->LoadFile(_("arrowblue.png"), wxBITMAP_TYPE_PNG);
-    if( _padImage->IsOk() )
-    {
-        printf("Loaded button256blue.png\n");
-    }
-    else
+	_leftArrowImage = new wxBitmap();
+    _leftArrowImage->LoadFile(_("arrowblue.png"), wxBITMAP_TYPE_PNG);
+	_rightArrowImage = new wxBitmap();
+    _rightArrowImage->LoadFile(_("leftarrowblue.png"), wxBITMAP_TYPE_PNG);
+    if( !_padImage->IsOk() )
     {
         printf("Failed to open button256blue.png\n");
     }
-    if( _arrowImage->IsOk() )
-    {
-        printf("Loaded arrowblue.png\n");
-    }
-    else
+    if( !_leftArrowImage->IsOk() )
     {
         printf("Failed to open arrowblue.png\n");
+    }
+    if( !_rightArrowImage->IsOk() )
+    {
+        printf("Failed to open leftarrowblue.png\n");
     }
 
     // Create pads.
     wxString title = wxString(_("Empty"));
     for( int i = 0; i < MAX_PADS; i++ )
     {
-        _pads[i] = new wxDrumPad(this, title, _padImage, _arrowImage, MIDI_OFFSET+i, this, 500+i, wxPoint(0,0), wxSize(256,256));
+        _pads[i] = new wxDrumPad(this, title, _padImage, _leftArrowImage, _rightArrowImage, MIDI_OFFSET+i, this, 500+i, wxPoint(0,0), wxSize(256,256));
         sizer->Add(_pads[i], 0, i % NUM_PADS_WIDE, i / NUM_PADS_WIDE);
     }
 
@@ -264,9 +273,10 @@ bool DrumPads::InitializeAudio()
 		_sampleSetting[2] = 22;
 		_sampleSetting[3] = 26;
 #else
-		for( int j = 0; j < NUM_PADS; j++ )
+		_sampleSetting[0] = 82;
+		for( int j = 1; j < NUM_PADS; j++ )
 		{
-			_sampleSetting[j] = j * 6 + 4;
+			_sampleSetting[j] = j * 7 + -3;
 		}
 #endif
 
@@ -496,11 +506,11 @@ void DrumPads::OnLock( wxCommandEvent& )
 	}
 	if( _locked )
 	{
-		_lockButton->SetLabel(wxString(_("Unlock")));
+		_lockButton->SetLabel(wxString(_("Unlock Pads")));
 	}
 	else
 	{
-		_lockButton->SetLabel(wxString(_("Lock")));
+		_lockButton->SetLabel(wxString(_("Lock Pads")));
 	}
 }
 
