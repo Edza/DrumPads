@@ -59,6 +59,8 @@ END_EVENT_TABLE()
 
 DrumPads::DrumPads()
 {
+    _midiInDevice = NULL;
+    _midiOutDevice = NULL;
 }
 
 DrumPads::DrumPads(wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
@@ -141,6 +143,8 @@ void DrumPads::ArrowClicked( int note )
 
 bool DrumPads::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
 {
+    _midiInDevice = NULL;
+    _midiOutDevice = NULL;
     wxDialog::Create( parent, id, caption, pos, size, style );
 
     CreateControls();
@@ -155,7 +159,7 @@ bool DrumPads::Create( wxWindow* parent, wxWindowID id, const wxString& caption,
         SetIcon(_icon);
     }
     InitializeAudio();
-	InitializeMidi();
+    InitializeMidi();
 
     return true;
 }
