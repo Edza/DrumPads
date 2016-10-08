@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIconFile</key>
+	<string>drumpads.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.zetacentauri.DrumPads</string>
+	<key>CFBundleVersion</key>
+	<string>2.0.0</string>
+	<key>CFBundleSignature</key>
+	<string>ttxt</string>
+	<key>CFBundleExecutable</key>
+        <string>DrumPads</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>drumpads</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>drumpads.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>DrumPads Drum Kit</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+		</dict>
+	</array>
+</dict>
+</plist>

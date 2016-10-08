@@ -107,7 +107,7 @@
 #define NUM_PADS_HIGH 3
 #endif
 
-#ifndef WIN32
+#ifdef linux
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_mixer.h"
 #else

@@ -13,6 +13,7 @@
 #include "../wxAudioControls/wxSettingsFile.h"
 #include "wx/dir.h"
 #include "wx/filename.h"
+#include "wx/stdpaths.h"
 
 // The MIDI note to start with (for the first pad)
 #define MIDI_OFFSET 36
@@ -58,6 +59,8 @@ END_EVENT_TABLE()
 
 DrumPads::DrumPads()
 {
+    _midiInDevice = NULL;
+    _midiOutDevice = NULL;
 }
 
 DrumPads::DrumPads(wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
@@ -139,7 +142,11 @@ void DrumPads::ArrowClicked( int note, bool back )
 		 _sampleSetting[note] = (_sampleSetting[note] + 1) % _waveFileNames.Count();
 	}
 	 Mix_FreeChunk(_sample[note]);
+#ifndef __APPLE__
 	wxString fileName = wxString::Format(_("samples\\%s"), _waveFileNames[_sampleSetting[note]]);
+#else
+	wxString fileName = wxString::Format(_("%s/samples/%s"), wxStandardPaths::Get().GetResourcesDir(), _waveFileNames[_sampleSetting[note]]);
+#endif
 	_sample[note] = Mix_LoadWAV(fileName.mb_str().data());
 	wxString title = wxFileName(_waveFileNames[_sampleSetting[note]]).GetName();
 	_pads[note]->SetText(title);
@@ -147,16 +154,23 @@ void DrumPads::ArrowClicked( int note, bool back )
 
 bool DrumPads::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style )
 {
+    _midiInDevice = NULL;
+    _midiOutDevice = NULL;
     wxDialog::Create( parent, id, caption, pos, size, style );
 
     CreateControls();
     Centre();
-    if( _icon.LoadFile(_T("DrumPads.ico"), wxBITMAP_TYPE_ICO ))
+#ifndef __APPLE__
+    wxString filepath = _("DrumPads.ico");
+#else
+    wxString filepath = wxString::Format(_("%s//%s"), wxStandardPaths::Get().GetResourcesDir(), _("DrumPads.ico"));
+#endif
+    if( _icon.LoadFile(filepath, wxBITMAP_TYPE_ICO ))
     {
         SetIcon(_icon);
     }
     InitializeAudio();
-	InitializeMidi();
+    InitializeMidi();
 
     return true;
 }
@@ -189,12 +203,30 @@ bool DrumPads::CreateControls()
 	vertsizer->Add(sizer);
 
     // Load images.
-	_padImage = new wxBitmap();
-	_padImage->LoadFile(_("button256blue.png"), wxBITMAP_TYPE_PNG);
-	_leftArrowImage = new wxBitmap();
+    _padImage = new wxBitmap();
+#ifndef __APPLE__
+    _padImage->LoadFile(_("button256blue.png"), wxBITMAP_TYPE_PNG);
+#else
+    wxString filepath = wxString::Format(_("%s/%s"), wxStandardPaths::Get().GetResourcesDir(), _("button256blue.png"));
+    //printf("Loading %s", filepath.mb_str());
+    _padImage->LoadFile(filepath, wxBITMAP_TYPE_PNG); 
+#endif
+    _leftArrowImage = new wxBitmap();
+#ifndef __APPLE__
     _leftArrowImage->LoadFile(_("arrowblue.png"), wxBITMAP_TYPE_PNG);
-	_rightArrowImage = new wxBitmap();
+#else
+    filepath = wxString::Format(_("%s/%s"), wxStandardPaths::Get().GetResourcesDir(), _("arrowblue.png"));
+    //printf("Loading %s", filepath.mb_str());
+    _leftArrowImage->LoadFile(filepath, wxBITMAP_TYPE_PNG);
+#endif
+    _rightArrowImage = new wxBitmap();
+#ifndef __APPLE__
     _rightArrowImage->LoadFile(_("leftarrowblue.png"), wxBITMAP_TYPE_PNG);
+#else
+    filepath = wxString::Format(_("%s/%s"), wxStandardPaths::Get().GetResourcesDir(), _("leftarrowblue.png"));
+    //printf("Loading %s", filepath.mb_str());
+    _rightArrowImage->LoadFile(filepath, wxBITMAP_TYPE_PNG);
+#endif
     if( !_padImage->IsOk() )
     {
         printf("Failed to open button256blue.png\n");
@@ -249,7 +281,12 @@ bool DrumPads::InitializeAudio()
     wxDir dir;
     wxString filename;
     int numFound = 0;
+#ifndef __APPLE__
     wxDir::GetAllFiles(wxString(_(".\\samples")), &_waveFileNames, wxString(_("*.wav")), wxDIR_FILES);
+#else
+    wxString dirname = wxString::Format(_("%s/samples"), wxStandardPaths::Get().GetResourcesDir());
+    wxDir::GetAllFiles(dirname, &_waveFileNames, wxString(_("*.wav")), wxDIR_FILES);
+#endif
     numFound = _waveFileNames.GetCount();
     printf("Found %d samples.\n", numFound);
 	if( numFound < 1 )
@@ -283,7 +320,11 @@ bool DrumPads::InitializeAudio()
 		// Load waveforms - only the ones assigned to pads. If we change waveforms, unload and reload in that code.
 		for( int i = 0; i < NUM_PADS; i++ )
 		{
+#ifndef __APPLE__
 			wxString fileName = wxString::Format(_("samples\\%s"), _waveFileNames[_sampleSetting[i]]);
+#else
+	                wxString fileName = wxString::Format(_("%s/samples/%s"), wxStandardPaths::Get().GetResourcesDir(), _waveFileNames[_sampleSetting[i]]);
+#endif
 			_sample[i] = Mix_LoadWAV(fileName.mb_str().data());
 			if( _sample[i] == NULL )
 			{
@@ -482,8 +523,12 @@ void DrumPads::OnLoad( wxCommandEvent& )
 				_sampleSetting[i] = j;
 				// DELETE EXISTING SAMPLE, LOAD NEW
 				// TODO: Handle "not found" samples.
-				 Mix_FreeChunk(_sample[i]);
+                                Mix_FreeChunk(_sample[i]);
+#ifndef __APPLE__
 				wxString fileName = wxString::Format(_("samples\\%s"), _waveFileNames[_sampleSetting[i]]);
+#else
+                                wxString fileName = wxString::Format(_("%s/samples/%s"), wxStandardPaths::Get().GetResourcesDir(), _waveFileNames[_sampleSetting[i]]);
+#endif
 				_sample[i] = Mix_LoadWAV(fileName.mb_str().data());
 				wxString title = wxFileName(_waveFileNames[_sampleSetting[i]]).GetName();
 				_pads[i]->SetText(title);
