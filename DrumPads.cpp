@@ -196,7 +196,7 @@ bool DrumPads::CreateControls()
 	_midiButton = new wxButton(this, ID_MIDIBUTTON, "MIDI Settings");
 	buttonsizer->Add(_midiButton);
 
-	_lockButton = new wxButton(this, ID_LOCKBUTTON, "Lock Pads");
+	_lockButton = new wxButton(this, ID_LOCKBUTTON, "  Lock Pads  ");
 	buttonsizer->Add(_lockButton);
 
     wxGridSizer* sizer = new wxGridSizer(NUM_PADS_HIGH, NUM_PADS_WIDE, 0, 0);
