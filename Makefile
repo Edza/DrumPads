@@ -4,7 +4,7 @@
 WX_CONFIG := wx-config
 
 # Main executable file
-PROGRAM = DrumPads
+PROGRAM = installer/DrumPads.app/Contents/MacOS/DrumPads
 
 # Directory containing library portions of code.
 INCLUDEDIR2 = /usr/include
@@ -12,12 +12,16 @@ INCLUDEDIR2 = /usr/include
 # to work, because they don't in 2.1 for some reason. Something to do with the dummy device, according to an error.
 INCLUDEDIR = ../../lib/SDL_2-2.0.3/include
 INCLUDEDIR3 = ../../lib/rtmidi-2.1.0
-INCLUDEDIR4 = ../../lib/SDL2_mixer-2.0.0/include
+INCLUDEDIR4 = ../../lib/SDL2_mixer-2.0.1
 LIBDIR = /usr/lib
+LIBDIR2 = ../../lib/SDL_2-2.0.3/lib/x64
+LIBDIR3 = ../../lib/SDL2_mixer-2.0.0/lib/x64
+LIBDIR4 = ../../lib
+LIBDIR5 = ../../lib/rtmidi-2.1.0
 
 # Object files
 #OBJECTS = wxDrumPad.o DrumPads.o DrumPadsApp.o $(INCLUDEDIR3)/RtMidi.o
-OBJECTS = wxDrumPad.o DrumPads.o DrumPadsApp.o ../wxAudioControls/wxSettingsFile.o ../wxAudioControls/wxMidiSettingsDlg.o ../wxAudioControls/wxSwitch.o ../wxAudioControls/wxBitmapSpinButton.o ../wxAudioControls/wxKeylessChoice.o
+OBJECTS = wxDrumPad.o DrumPads.o DrumPadsApp.o ../wxAudioControls/wxSettingsFile.o ../wxAudioControls/wxMidiSettingsDlg.o ../wxAudioControls/wxSwitch.o ../wxAudioControls/wxBitmapSpinButton.o ../wxAudioControls/wxKeylessChoice.o $(INCLUDEDIR3)/RtMidi.o
 
 #CXX = $(shell $(WX_CONFIG) --cxx -ggdb)
 CXX = $(shell $(WX_CONFIG) --cxx -O3)
@@ -31,7 +35,7 @@ CXX = $(shell $(WX_CONFIG) --cxx -O3)
 all:    $(PROGRAM)
 
 $(PROGRAM):	$(OBJECTS)
-	$(CXX) -o $(PROGRAM) $(OBJECTS) -L$(LIBDIR) `$(WX_CONFIG) --libs` -lportaudio -lasound -lpthread -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lrtmidi
+	$(CXX) -o $(PROGRAM) $(OBJECTS) -L$(LIBDIR) -L$(LIBDIR2) -L$(LIBDIR3) -L$(LIBDIR4) -L$(LIBDIR5) `$(WX_CONFIG) --libs` -lportaudio -lpthread -lSDL2 -F../../lib/SDL2_ttf.framework -lSDL2_mixer -lrtmidi
 
 clean: 
 	rm -f *.o $(PROGRAM) $(INCLUDEDIR3)/*.o
