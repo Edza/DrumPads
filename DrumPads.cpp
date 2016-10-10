@@ -578,33 +578,42 @@ void DrumPads::OnMidiSettings( wxCommandEvent& )
 
 bool DrumPads::InitializeMidi()
 {
-	_inputChannel = 1;
-	_outputChannel = 1;
+    _inputChannel = 1;
+    _outputChannel = 1;
     _midiInDevice = new RtMidiIn();
-	_midiOutDevice = new RtMidiOut();
-	EnableMidiOutput(false);
-	_midiInputDeviceNumber = 0;  // MIDI Mapper
-	_midiOutputDeviceNumber = 0;  // Default Output
+    _midiOutDevice = new RtMidiOut();
+    EnableMidiOutput(false);
+    _midiInputDeviceNumber = 0;  // MIDI Mapper
+    _midiOutputDeviceNumber = 0;  // Default Output
+
     // Open default MIDI devices.
-    int numDevices = _midiInDevice->getPortCount();
-    if( numDevices > 0 )
+    int numInDevices = _midiInDevice->getPortCount();
+    if( numInDevices > 0 )
     {
-	    SelectMidiInputDevice(_midiInputDeviceNumber);
+            SelectMidiInputDevice(_midiInputDeviceNumber);
     }
-    else
+    int numOutDevices = _midiOutDevice->getPortCount();
+    if( numOutDevices > 0 )
     {
-	    wxMessageBox(_("No MIDI input devices detected.  MIDI input is disabled."));
+            SelectMidiOutputDevice(_midiOutputDeviceNumber);
     }
-    numDevices = _midiOutDevice->getPortCount();
-    if( numDevices > 0 )
+
+    if( numOutDevices < 1 || numInDevices < 1 )
     {
-	    SelectMidiOutputDevice(_midiOutputDeviceNumber);
+        wxString in = _("");
+        wxString out = _("");
+        if( numInDevices < 1 )
+        {
+            in = _("No MIDI input devices detected.  MIDI input is disabled.");
+        }
+        if( numOutDevices < 1 )
+        {
+            out = _("No MIDI output devices detected.  MIDI output is disabled.");
+        }
+        wxMessageBox(wxString::Format(_("%s\n\n%s"), in, out ));
     }
-    else
-    {
-	    wxMessageBox(_("No MIDI output devices detected.  MIDI output is disabled."));
-    }
-	return true;
+
+    return true;
 }
 
 
