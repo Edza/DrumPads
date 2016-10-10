@@ -40,3 +40,4 @@ DrumPads.exe
 *.db
 *.cache
 
+.DS_Store
