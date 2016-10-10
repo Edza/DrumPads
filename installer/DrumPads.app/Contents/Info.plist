@@ -14,10 +14,14 @@
 	<string>6.0</string>
 	<key>CFBundleVersion</key>
 	<string>2.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>2.0</string>
 	<key>CFBundleSignature</key>
 	<string>ttxt</string>
 	<key>CFBundleExecutable</key>
         <string>DrumPads</string>
+        <key>LSApplicationCategoryType</key>
+        <string>public.app-category.music</string>
 	<key>CFBundleName</key>
 	<string>DrumPads</string>
 	<key>CFBundleDocumentTypes</key>
