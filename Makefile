@@ -20,17 +20,15 @@ LIBDIR4 = ../../lib
 LIBDIR5 = ../../lib/rtmidi-2.1.0
 
 # Object files
-#OBJECTS = wxDrumPad.o DrumPads.o DrumPadsApp.o $(INCLUDEDIR3)/RtMidi.o
 OBJECTS = wxDrumPad.o DrumPads.o DrumPadsApp.o ../wxAudioControls/wxSettingsFile.o ../wxAudioControls/wxMidiSettingsDlg.o ../wxAudioControls/wxSwitch.o ../wxAudioControls/wxBitmapSpinButton.o ../wxAudioControls/wxKeylessChoice.o $(INCLUDEDIR3)/RtMidi.o
 
-#CXX = $(shell $(WX_CONFIG) --cxx -ggdb)
 CXX = $(shell $(WX_CONFIG) --cxx -O3)
 
 .SUFFIXES:	.o .cpp
 
 .cpp.o :
-#	$(CXX) -c -O3 -D__MACOSX_CORE__ -I$(INCLUDEDIR) -I$(INCLUDEDIR2) -I$(INCLUDEDIR3) -I$(INCLUDEDIR4) `$(WX_CONFIG) --cxxflags` -o $@ $<
-	$(CXX) -c -g -ggdb -D__MACOSX_CORE__ -I$(INCLUDEDIR) -I$(INCLUDEDIR2) -I$(INCLUDEDIR3) -I$(INCLUDEDIR4) `$(WX_CONFIG) --cxxflags` -o $@ $<
+	$(CXX) -c -O3 -D__MACOSX_CORE__ -I$(INCLUDEDIR) -I$(INCLUDEDIR2) -I$(INCLUDEDIR3) -I$(INCLUDEDIR4) `$(WX_CONFIG) --cxxflags` -o $@ $<
+#	$(CXX) -c -g -ggdb -D__MACOSX_CORE__ -I$(INCLUDEDIR) -I$(INCLUDEDIR2) -I$(INCLUDEDIR3) -I$(INCLUDEDIR4) `$(WX_CONFIG) --cxxflags` -o $@ $<
 
 all:    $(PROGRAM)
 
