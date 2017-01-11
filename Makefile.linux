@@ -4,7 +4,7 @@
 WX_CONFIG := wx-config
 
 # Main executable file
-PROGRAM = installer/DrumPads.app/Contents/MacOS/DrumPads
+PROGRAM = Release/DrumPads
 
 # Directory containing library portions of code.
 INCLUDEDIR2 = /usr/include
