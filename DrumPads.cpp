@@ -284,14 +284,16 @@ bool DrumPads::InitializeAudio()
     wxDir dir;
     wxString filename;
     int numFound = 0;
-#ifndef __APPLE__
-    wxDir::GetAllFiles(wxString(_(".\\samples")), &_waveFileNames, wxString(_("*.wav")), wxDIR_FILES);
+#ifdef linux
+    wxString dirname = wxString(_("./samples"));
+#elif __APPLE__
+    wxString dirname = wxString(_(".\\samples"));
 #else
     wxString dirname = wxString::Format(_("%s/samples"), wxStandardPaths::Get().GetResourcesDir());
-    wxDir::GetAllFiles(dirname, &_waveFileNames, wxString(_("*.wav")), wxDIR_FILES);
 #endif
+    wxDir::GetAllFiles(dirname, &_waveFileNames, wxString(_("*.wav")), wxDIR_FILES);
     numFound = _waveFileNames.GetCount();
-    printf("Found %d samples.\n", numFound);
+    printf("Found %d samples in %s.\n", numFound, dirname.mb_str().data());
 	if( numFound < 1 )
 	{
 		wxMessageBox(wxString(_("No samples found. Cannot play audio.")), wxString(_("No Samples Found")));
