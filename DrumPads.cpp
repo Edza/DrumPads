@@ -131,11 +131,14 @@ void DrumPads::ArrowClicked( int note, bool back )
 	// Advance or decrement to the next sample, set the filename and number, load the file, and replace the current _sample data with the new one.
 	if( back )
 	{
-		 _sampleSetting[note] = (_sampleSetting[note] - 1);
-		 if( _sampleSetting[note] < 0 )
+		 if( _sampleSetting[note] == 0 )
 		 {
 			 _sampleSetting[note] = _waveFileNames.Count() - 1;
 		 }
+                 else
+                 {
+		     _sampleSetting[note] = (_sampleSetting[note] - 1);
+                 }
 	}
 	else
 	{
