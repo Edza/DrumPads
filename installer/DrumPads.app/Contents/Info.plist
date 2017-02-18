@@ -2,6 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+        <key>LSEnvironment</key>
+        <dict>
+           <key>LSMinimumSystemVersion</key>
+           <string>10.11.0</string>
+        </dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleIconFile</key>
@@ -13,7 +18,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleVersion</key>
-	<string>2.0.6</string>
+	<string>2.0.7</string>
 	<key>CFBundleShortVersionString</key>
 	<string>2.0</string>
 	<key>CFBundleSignature</key>
