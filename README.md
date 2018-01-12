@@ -39,5 +39,11 @@ Windows and Linux and released on http://zetacentauri.com
 
 A prebuilt Windows installer is available in the installer directory.
 
+## Building
+
 In order to build this program, you'll need to have SDL installed, including
 SDL_image, SDL_ttf, and SDL_mixer.
+
+On Linux, you can get prerequisites with:
+
+sudo apt-get install libsdl2-dev libsdl2-mixer-dev
