@@ -69,6 +69,12 @@ https://github.com/Xangis/DrumPads/blob/master/installer/DrumPads2Setup.exe
 In order to build this program, you'll need to have SDL installed, including
 SDL_image, SDL_ttf, and SDL_mixer.
 
+It also depends on wxWidgets and was originally built with version 3.0.2.
+
+It also requires the wxAudioControls project from my GitHub, available here:
+
+https://github.com/Xangis/wxAudioControls
+
 ### Windows
 
 Use Visual Studio and load the DrumPads.sln file to load the project.
@@ -77,7 +83,8 @@ You will probably have to update library paths to match where things are on your
 system in order to build.
 
 There is an InnoSetup project at installer/DrumPads2Setup.iss that you can use
-to build the installer.
+to build the installer. Paths in that are hard-coded, so you'll need to update
+them to match where your project files are.
 
 There was an attempt to package this app for the Windows 10 store, but it was
 never finished. See installer/package.bat for progress so far.
@@ -110,7 +117,10 @@ make -f Makefile.linux
 You may need to edit the makefile to change paths to match where the SDL 
 libraries are on your system.
 
-## Known Issues
+## Status And Known Issues
+
+I consider this app to be feature complete and do not plan to add any new features.
+However, I do still maintain it.
 
 This app needs some work in order to build cleanly on all operating systems. If
 you make any improvements I am willing to accept pull requests.
