@@ -2,9 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "DrumPads"
-#define MyAppVersion "2"
-#define MyAppPublisher "Zeta Centauri"
-#define MyAppURL "http://zetacentauri.com/software_drumpads.htm"
+#define MyAppVersion "2.01"
+#define MyAppPublisher "Jason Champion"
+#define MyAppURL "https://github.com/Xangis/DrumPads"
 #define MyAppExeName "DrumPads.exe"
 
 [Setup]
@@ -19,9 +19,9 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={pf}\Zeta Centauri\DrumPads
+DefaultDirName={pf}\DrumPads
 DisableDirPage=yes
-DefaultGroupName=Zeta Centauri\{#MyAppName}
+DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=C:\Users\Xangis\code\DrumPads\Release\License.txt
 OutputDir=C:\Users\Xangis\code\DrumPads\installer
