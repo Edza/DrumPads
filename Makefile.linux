@@ -32,7 +32,7 @@ CXX = $(shell $(WX_CONFIG) --cxx -O3)
 all:    $(PROGRAM)
 
 $(PROGRAM):	$(OBJECTS)
-	$(CXX) -o $(PROGRAM) $(OBJECTS) -L$(LIBDIR) -L$(LIBDIR2) -L$(LIBDIR3) -L$(LIBDIR4) `$(WX_CONFIG) --libs` -lportaudio -lpthread -lSDL2 -F../../lib/SDL2_ttf.framework -lSDL2_mixer -lrtmidi
+	$(CXX) -o $(PROGRAM) $(OBJECTS) -L$(LIBDIR) -L$(LIBDIR2) -L$(LIBDIR3) -L$(LIBDIR4) `$(WX_CONFIG) --libs` -lpthread -lSDL2 -F../../lib/SDL2_ttf.framework -lSDL2_mixer -lrtmidi
 
 clean: 
 	rm -f *.o $(PROGRAM)

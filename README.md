@@ -57,7 +57,7 @@ external MIDI devices. This means you could play an external MIDI-enabled drum
 machine using your computer keyboard, mouse, or touchscreen.
 
 It was originally written for webOS as a paid app. It was later ported to
-Windows and Linux and released on http://zetacentauri.com. It was also ported
+Windows and Linux and released on the Zeta Centauri website. It was also ported
 to OSX but never released.
 
 A prebuilt Windows installer is available in the installer directory here:
@@ -108,7 +108,13 @@ there are probably some things that need to be adjusted in those files.
 
 On Linux, you can get prerequisites with:
 
-sudo apt-get install libsdl2-dev libsdl2-mixer-dev
+sudo apt-get install libsdl2-dev libsdl2-mixer-dev librtmidi-dev libwxgtk3.0-dev
+
+However, you're better off installing wxWidgets from source rather than using the
+version of libwxgtk3.0-dev from your Linux distro's repository because it will
+be more up-to-date. You can get it here:
+
+http://wxwidgets.org/
 
 Make with this command:
 
