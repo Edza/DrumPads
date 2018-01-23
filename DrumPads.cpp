@@ -707,8 +707,12 @@ void DrumPads::SelectMidiInputDevice(int number)
         _midiInDevice->openPort(number);
         _midiInDevice->setCallback(MidiMessageHandler, this);
     }
-    //catch( RtMidiError &error )
+#ifndef RtMidiError
+    // RtMidiError will be undefined if using a version of RtMidi < 3.0.0.
+    catch( RtError &error )
+#else
     catch( RtMidiError &error )
+#endif
     {
         //wxMessageBox(wxString::FromAscii(error.what()));
         wxMessageBox(wxString::FromAscii(error.what()));
@@ -728,7 +732,12 @@ void DrumPads::SelectMidiOutputDevice(int number)
         _midiOutDevice->closePort();
         _midiOutDevice->openPort(number);
     }
+#ifndef RtMidiError
+    // RtMidiError will be undefined if using a version of RtMidi < 3.0.0.
+    catch( RtError &error )
+#else
     catch( RtMidiError &error )
+#endif
     {
         wxMessageBox(wxString::FromAscii(error.what()));
     }
